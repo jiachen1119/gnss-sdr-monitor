@@ -44,20 +44,20 @@
  */
 ChannelTableModel::ChannelTableModel()
 {
-    m_mapSignalPrettyName["1C"] = "L1 C/A";
-    m_mapSignalPrettyName["1B"] = "E1";
-    m_mapSignalPrettyName["1G"] = "L1 C/A";
-    m_mapSignalPrettyName["2S"] = "L2C";
-    m_mapSignalPrettyName["2G"] = "L2 C/A";
-    m_mapSignalPrettyName["5X"] = "E5a";
-    m_mapSignalPrettyName["L5"] = "L5";
+    mapSignalName_["1C"] = "L1 C/A";
+    mapSignalName_["1B"] = "E1";
+    mapSignalName_["1G"] = "L1 C/A";
+    mapSignalName_["2S"] = "L2C";
+    mapSignalName_["2G"] = "L2 C/A";
+    mapSignalName_["5X"] = "E5a";
+    mapSignalName_["L5"] = "L5";
 
     m_columns = 11;
     m_bufferSize = DEFAULT_BUFFER_SIZE;
 }
 
 /*!
- Triggers a reset of the table model which casues the views to be repainted.
+ Triggers a reset of the table model which causes the views to be repainted.
  */
 void ChannelTableModel::update()
 {
@@ -422,9 +422,9 @@ QString ChannelTableModel::getSignalPrettyName(const gnss_sdr::GnssSynchro *ch)
             system_name = QStringLiteral("Galileo");
         }
 
-        if (m_mapSignalPrettyName.find(ch->signal()) != m_mapSignalPrettyName.end())
+        if (mapSignalName_.find(ch->signal()) != mapSignalName_.end())
         {
-            system_name.append(" ").append(m_mapSignalPrettyName.at(ch->signal()));
+            system_name.append(" ").append(mapSignalName_.at(ch->signal()));
         }
     }
 

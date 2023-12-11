@@ -5,29 +5,6 @@
  *
  * \author Álvaro Cebrián Juan, 2019. acebrianjuan(at)gmail.com
  *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
  */
 
 
@@ -35,57 +12,56 @@
 
 TelnetManager::TelnetManager(QObject *parent) : QObject(parent)
 {
-    m_tcpSocket = new QTcpSocket(this);
-    connect(m_tcpSocket, &QIODevice::readyRead, this, &TelnetManager::readResponse);
+    tcpSocket_ = new QTcpSocket(this);
+    connect(tcpSocket_, &QIODevice::readyRead, this, &TelnetManager::readResponse);
 
     // Forward signals from QAbstractSocket.
-    connect(m_tcpSocket, &QAbstractSocket::connected, this, &TelnetManager::connected);
-    connect(m_tcpSocket, &QAbstractSocket::disconnected, this, &TelnetManager::disconnected);
-    connect(m_tcpSocket, &QAbstractSocket::stateChanged, this, &TelnetManager::stateChanged);
-    connect(m_tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TelnetManager::error);
+    connect(tcpSocket_, &QAbstractSocket::connected, this, &TelnetManager::connected);
+    connect(tcpSocket_, &QAbstractSocket::disconnected, this, &TelnetManager::disconnected);
+    connect(tcpSocket_, &QAbstractSocket::stateChanged, this, &TelnetManager::stateChanged);
+    connect(tcpSocket_, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TelnetManager::error);
 }
 
-void TelnetManager::setAddress(QString addr_str)
+void TelnetManager::setAddress(const QString& addr_str)
 {
-    m_address.setAddress(addr_str);
+    hostAddress_.setAddress(addr_str);
 }
 
-void TelnetManager::setPort(QString port_str)
+void TelnetManager::setPort(const QString& port_str)
 {
-    m_port = port_str.toInt();
+    port_ = port_str.toInt();
 }
 
 QHostAddress TelnetManager::getAddress() const
 {
-    return m_address;
+    return hostAddress_;
 }
 
 quint16 TelnetManager::getPort() const
 {
-    return m_port;
+    return port_;
 }
 
 QAbstractSocket::SocketState TelnetManager::getState() const
 {
-    return m_tcpSocket->state();
+    return tcpSocket_->state();
 }
 
 void TelnetManager::connectTcp()
 {
-    m_tcpSocket->connectToHost(m_address, m_port);
+    tcpSocket_->connectToHost(hostAddress_, port_);
 }
 
 void TelnetManager::disconnectTcp()
 {
-    m_tcpSocket->disconnectFromHost();
+    tcpSocket_->disconnectFromHost();
 }
 
 bool TelnetManager::sendCommand(Command cmd, QString args)
 {
-    if (m_tcpSocket->state() == QAbstractSocket::ConnectedState)
+    if (tcpSocket_->state() == QAbstractSocket::ConnectedState)
     {
         QByteArray data;
-
         switch (cmd)
         {
         case Command::Reset:
@@ -116,9 +92,8 @@ bool TelnetManager::sendCommand(Command cmd, QString args)
 
         if (!data.isEmpty())
         {
-            m_tcpSocket->write(data, data.size());
-
-            if (m_tcpSocket->waitForBytesWritten())
+            tcpSocket_->write(data, data.size());
+            if (tcpSocket_->waitForBytesWritten())
             {
                 emit txData(data);
                 return true;
@@ -130,6 +105,6 @@ bool TelnetManager::sendCommand(Command cmd, QString args)
 
 void TelnetManager::readResponse()
 {
-    QByteArray data = m_tcpSocket->readAll();
+    QByteArray data = tcpSocket_->readAll();
     emit rxData(data);
 }

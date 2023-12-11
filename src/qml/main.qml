@@ -76,7 +76,7 @@ Map
     Connections
     {
         target: vehicle
-        onCoordinateChanged:
+        function onCoordinateChanged()
         {
             if (follow.checked)
             {

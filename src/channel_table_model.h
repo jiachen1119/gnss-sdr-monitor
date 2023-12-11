@@ -41,8 +41,9 @@
 class ChannelTableModel : public QAbstractTableModel
 {
 public:
+    //initialize the channel of gnss signals
     ChannelTableModel();
-
+    // update the print
     void update();
 
     void populateChannels(const gnss_sdr::Observables *m_stocks);
@@ -79,7 +80,7 @@ protected:
     std::map<int, boost::circular_buffer<double>> m_channelsDoppler;
 
 private:
-    std::map<std::string, QString> m_mapSignalPrettyName;
+    std::map<std::string, QString> mapSignalName_;
 };
 
 #endif  // GNSS_SDR_MONITOR_CHANNEL_TABLE_MODEL_H_

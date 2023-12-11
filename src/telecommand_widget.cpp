@@ -40,6 +40,7 @@ TelecommandWidget::TelecommandWidget(QWidget *parent) : QWidget(parent),
 {
     ui->setupUi(this);
 
+    //check mark
     ui->autoScrollCheckBox->setChecked(true);
     ui->reconnectCheckBox->setChecked(true);
     ui->clearCheckBox->setChecked(true);
@@ -52,18 +53,22 @@ TelecommandWidget::TelecommandWidget(QWidget *parent) : QWidget(parent),
     ui->statusPushButton->setEnabled(false);
     ui->standbyPushButton->setEnabled(false);
     ui->resetPushButton->setEnabled(false);
+
     ui->coldStartPushButton->setEnabled(false);
     ui->warmStartPushButton->setEnabled(false);
     ui->hotStartPushButton->setEnabled(false);
 
-    m_timer.setInterval(1000);
-    connect(&m_timer, &QTimer::timeout, this, &TelecommandWidget::reconnect);
+    timer.setInterval(1000);
+    connect(&timer, &QTimer::timeout, this, &TelecommandWidget::reconnect);
 
+    // if the text is changed, goto handleInputsChanged
     connect(ui->addressLineEdit, &QLineEdit::textChanged, this, &TelecommandWidget::onAddressEditTextchanged);
     connect(ui->portLineEdit, &QLineEdit::textChanged, this, &TelecommandWidget::onPortEditTextchanged);
     connect(this, &TelecommandWidget::inputsChanged, this, &TelecommandWidget::handleInputsChanged);
+
     connect(ui->clearPushButton, &QPushButton::clicked, this, &TelecommandWidget::clear);
 
+    // connect the pushbutton to the send message
     connect(ui->resetPushButton, &QPushButton::clicked, this, &TelecommandWidget::onResetClicked);
     connect(ui->standbyPushButton, &QPushButton::clicked, this, &TelecommandWidget::onStandbyClicked);
     connect(ui->coldStartPushButton, &QPushButton::clicked, this, &TelecommandWidget::onColdstartClicked);
@@ -72,17 +77,18 @@ TelecommandWidget::TelecommandWidget(QWidget *parent) : QWidget(parent),
     connect(ui->statusPushButton, &QPushButton::clicked, this, &TelecommandWidget::onStatusClicked);
     connect(ui->connectPushButton, &QPushButton::clicked, this, &TelecommandWidget::onConnectClicked);
 
-    connect(&m_telnetManager, &TelnetManager::txData, this, &TelecommandWidget::printText);
-    connect(&m_telnetManager, &TelnetManager::rxData, this, &TelecommandWidget::printText);
+    connect(&telnetManager_, &TelnetManager::txData, this, &TelecommandWidget::printText);
+    connect(&telnetManager_, &TelnetManager::rxData, this, &TelecommandWidget::printText);
 
-    connect(&m_telnetManager, &TelnetManager::connected, this, &TelecommandWidget::statusConnected);
-    connect(&m_telnetManager, &TelnetManager::disconnected, this, &TelecommandWidget::statusDisconnected);
+    // connect button and save configure
+    connect(&telnetManager_, &TelnetManager::connected, this, &TelecommandWidget::statusConnected);
+    connect(&telnetManager_, &TelnetManager::disconnected, this, &TelecommandWidget::statusDisconnected);
 
     // Forward signals from TelnetManager.
-    connect(&m_telnetManager, &TelnetManager::connected, this, &TelecommandWidget::connected);
-    connect(&m_telnetManager, &TelnetManager::disconnected, this, &TelecommandWidget::disconnected);
+    connect(&telnetManager_, &TelnetManager::connected, this, &TelecommandWidget::connected);
+    connect(&telnetManager_, &TelnetManager::disconnected, this, &TelecommandWidget::disconnected);
 
-    connect(&m_telnetManager, &TelnetManager::error, this, &TelecommandWidget::printError);
+    connect(&telnetManager_, &TelnetManager::error, this, &TelecommandWidget::printError);
 
     // Load settings from last session.
     loadSettings();
@@ -92,7 +98,7 @@ TelecommandWidget::TelecommandWidget(QWidget *parent) : QWidget(parent),
 
 TelecommandWidget::~TelecommandWidget()
 {
-    m_telnetManager.disconnectTcp();
+    telnetManager_.disconnectTcp();
 
     QSettings settings;
     settings.beginGroup("TelecommandWidget");
@@ -102,18 +108,24 @@ TelecommandWidget::~TelecommandWidget()
     delete ui;
 }
 
-void TelecommandWidget::setAddress(QString addr_str)
+void TelecommandWidget::setAddress(const QString& addr_str)
 {
-    m_telnetManager.setAddress(addr_str);
+    telnetManager_.setAddress(addr_str);
     ui->addressLineEdit->setText(addr_str);
 }
 
-void TelecommandWidget::setPort(QString port_str)
+/*!
+ *
+ * @param port_str
+ * @brief set the port of telecommand
+ */
+void TelecommandWidget::setPort(const QString& port_str)
 {
-    m_telnetManager.setPort(port_str);
+    telnetManager_.setPort(port_str);
     ui->portLineEdit->setText(port_str);
 }
 
+// decide the connect button state
 void TelecommandWidget::handleInputsChanged()
 {
     if (ui->addressLineEdit->text().isEmpty() || ui->portLineEdit->text().isEmpty())
@@ -145,11 +157,11 @@ void TelecommandWidget::onPortEditTextchanged()
 
 void TelecommandWidget::onResetClicked()
 {
-    m_telnetManager.sendCommand(TelnetManager::Command::Reset);
+    telnetManager_.sendCommand(TelnetManager::Command::Reset);
 
     if (ui->reconnectCheckBox->isChecked())
     {
-        m_timer.start();
+        timer.start();
     }
 
     if (ui->clearCheckBox->isChecked())
@@ -160,62 +172,62 @@ void TelecommandWidget::onResetClicked()
 
 void TelecommandWidget::onStandbyClicked()
 {
-    m_telnetManager.sendCommand(TelnetManager::Command::Standby);
+    telnetManager_.sendCommand(TelnetManager::Command::Standby);
 }
 
 void TelecommandWidget::onColdstartClicked()
 {
-    m_telnetManager.sendCommand(TelnetManager::Command::ColdStart);
+    telnetManager_.sendCommand(TelnetManager::Command::ColdStart);
 }
 
 void TelecommandWidget::onWarmstartClicked()
 {
-    m_telnetManager.sendCommand(TelnetManager::Command::WarmStart, getArgs());
+    telnetManager_.sendCommand(TelnetManager::Command::WarmStart, getArgs());
 }
 
 void TelecommandWidget::onHotstartClicked()
 {
-    m_telnetManager.sendCommand(TelnetManager::Command::HotStart, getArgs());
+    telnetManager_.sendCommand(TelnetManager::Command::HotStart, getArgs());
 }
 
 void TelecommandWidget::onStatusClicked()
 {
-    m_telnetManager.sendCommand(TelnetManager::Command::Status);
+    telnetManager_.sendCommand(TelnetManager::Command::Status);
 }
 
 void TelecommandWidget::onConnectClicked()
 {
     // What's the current state of the socket?
-    QAbstractSocket::SocketState state = m_telnetManager.getState();
+    QAbstractSocket::SocketState state = telnetManager_.getState();
 
     if (state == QAbstractSocket::ConnectedState)
     {
         // The socket is connected, so let's disconnect now.
-        m_telnetManager.sendCommand(TelnetManager::Command::Exit);
+        telnetManager_.sendCommand(TelnetManager::Command::Exit);
     }
     else if (state == QAbstractSocket::UnconnectedState)
     {
         // The socket is disconnected, so let's attempt a connection now.
         setAddress(ui->addressLineEdit->text());
         setPort(ui->portLineEdit->text());
-        m_telnetManager.connectTcp();
+        telnetManager_.connectTcp();
     }
 }
 
 void TelecommandWidget::reconnect()
 {
     // What's the current state of the socket?
-    QAbstractSocket::SocketState state = m_telnetManager.getState();
-
+    QAbstractSocket::SocketState state = telnetManager_.getState();
+    // if the connection is not established
     if (state != QAbstractSocket::ConnectedState && state != QAbstractSocket::ConnectingState)
     {
         // Attempt a connection
-        m_telnetManager.connectTcp();
+        telnetManager_.connectTcp();
     }
 
     if (state == QAbstractSocket::ConnectedState)
     {
-        m_timer.stop();
+        timer.stop();
     }
 }
 
@@ -224,8 +236,8 @@ void TelecommandWidget::statusConnected()
     // The connection was successful so let's save the address and port number.
     QSettings settings;
     settings.beginGroup("tcp_socket");
-    settings.setValue("address", m_telnetManager.getAddress().toString());
-    settings.setValue("port", m_telnetManager.getPort());
+    settings.setValue("address", telnetManager_.getAddress().toString());
+    settings.setValue("port", telnetManager_.getPort());
     settings.endGroup();
 
     qDebug() << "Settings Saved";
@@ -264,7 +276,7 @@ void TelecommandWidget::statusDisconnected()
     ui->connectPushButton->setStyleSheet("background-color:#2ECC40;");
 }
 
-void TelecommandWidget::printText(QByteArray data)
+void TelecommandWidget::printText(const QByteArray& data)
 {
     // Save current position of the vertical scroll bar.
     int scroll = ui->plainTextEdit->verticalScrollBar()->value();
@@ -291,14 +303,14 @@ void TelecommandWidget::printText(QByteArray data)
 
 void TelecommandWidget::loadSettings()
 {
-    m_settings.beginGroup("TelecommandWidget");
-    restoreGeometry(m_settings.value("geometry").toByteArray());
-    m_settings.endGroup();
+    settings_.beginGroup("TelecommandWidget");
+    restoreGeometry(settings_.value("geometry").toByteArray());
+    settings_.endGroup();
 
-    m_settings.beginGroup("tcp_socket");
-    setAddress(m_settings.value("address", "").toString());
-    setPort(m_settings.value("port", "").toString());
-    m_settings.endGroup();
+    settings_.beginGroup("tcp_socket");
+    setAddress(settings_.value("address", "").toString());
+    setPort(settings_.value("port", "").toString());
+    settings_.endGroup();
 
     qDebug() << "Settings Loaded";
 }
@@ -317,14 +329,14 @@ void TelecommandWidget::printError(QAbstractSocket::SocketError socketError)
 
 void TelecommandWidget::saveSettings()
 {
-    m_settings.beginGroup("TelecommandWidget");
-    m_settings.setValue("geometry", saveGeometry());
-    m_settings.endGroup();
+    settings_.beginGroup("TelecommandWidget");
+    settings_.setValue("geometry", saveGeometry());
+    settings_.endGroup();
 
-    m_settings.beginGroup("tcp_socket");
-    m_settings.setValue("address", m_telnetManager.getAddress().toString());
-    m_settings.setValue("port", m_telnetManager.getPort());
-    m_settings.endGroup();
+    settings_.beginGroup("tcp_socket");
+    settings_.setValue("address", telnetManager_.getAddress().toString());
+    settings_.setValue("port", telnetManager_.getPort());
+    settings_.endGroup();
 
     qDebug() << "Settings Saved";
 }

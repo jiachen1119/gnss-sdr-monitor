@@ -3,30 +3,7 @@
  * \brief Implementation of the main window of the gui.
  *
  * \author Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com
- *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
+ * Kepeng Luan changed, Southeast University, 2023
  */
 
 
@@ -52,44 +29,44 @@ MainWindow::MainWindow(QWidget *parent)
     // second.
     m_updateTimer.setInterval(500);
     m_updateTimer.setSingleShot(true);
-    connect(&m_updateTimer, &QTimer::timeout, [this] { m_model->update(); });
+    connect(&m_updateTimer, &QTimer::timeout, [this] { model_->update(); });
 
     ui->setupUi(this);
 
     // Monitor_Pvt_Wrapper.
-    m_monitorPvtWrapper = new MonitorPvtWrapper();
+    monitorPvtWrapper_ = new MonitorPvtWrapper();
 
     // Telecommand widget.
-    m_telecommandDockWidget = new QDockWidget("Telecommand", this);
-    m_telecommandWidget = new TelecommandWidget(m_telecommandDockWidget);
-    m_telecommandDockWidget->setWidget(m_telecommandWidget);
-    addDockWidget(Qt::TopDockWidgetArea, m_telecommandDockWidget);
-    connect(m_telecommandWidget, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
+    telecommandDockWidget_ = new QDockWidget("Telecommand", this);
+    telecommandWidget_ = new TelecommandWidget(telecommandDockWidget_);
+    telecommandDockWidget_->setWidget(telecommandWidget_);
+    addDockWidget(Qt::TopDockWidgetArea, telecommandDockWidget_);
+    connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
     // Map widget.
-    m_mapDockWidget = new QDockWidget("Map", this);
-    m_mapWidget = new QQuickWidget(this);
-    m_mapWidget->rootContext()->setContextProperty("m_monitor_pvt_wrapper", m_monitorPvtWrapper);
-    m_mapWidget->setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-    m_mapWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    m_mapDockWidget->setWidget(m_mapWidget);
-    addDockWidget(Qt::TopDockWidgetArea, m_mapDockWidget);
+    mapDockWidget_ = new QDockWidget("Map", this);
+    mapWidget_ = new QQuickWidget(this);
+    mapWidget_->rootContext()->setContextProperty("m_monitor_pvt_wrapper", monitorPvtWrapper_);
+    mapWidget_->setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+    mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mapDockWidget_->setWidget(mapWidget_);
+    addDockWidget(Qt::TopDockWidgetArea, mapDockWidget_);
 
     // Altitude widget.
-    m_altitudeDockWidget = new QDockWidget("Altitude", this);
-    m_altitudeWidget = new AltitudeWidget(m_altitudeDockWidget);
-    m_altitudeDockWidget->setWidget(m_altitudeWidget);
-    addDockWidget(Qt::TopDockWidgetArea, m_altitudeDockWidget);
-    connect(m_monitorPvtWrapper, &MonitorPvtWrapper::altitudeChanged, m_altitudeWidget, &AltitudeWidget::addData);
-    connect(&m_updateTimer, &QTimer::timeout, m_altitudeWidget, &AltitudeWidget::redraw);
+    altitudeDockWidget_ = new QDockWidget("Altitude", this);
+    altitudeWidget_ = new AltitudeWidget(altitudeDockWidget_);
+    altitudeDockWidget_->setWidget(altitudeWidget_);
+    addDockWidget(Qt::TopDockWidgetArea, altitudeDockWidget_);
+    connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitudeWidget_, &AltitudeWidget::addData);
+    connect(&m_updateTimer, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
 
     // Dilution of precision widget.
     m_DOPDockWidget = new QDockWidget("DOP", this);
-    m_DOPWidget = new DOPWidget(m_DOPDockWidget);
-    m_DOPDockWidget->setWidget(m_DOPWidget);
+    DOPWidget_ = new DOPWidget(m_DOPDockWidget);
+    m_DOPDockWidget->setWidget(DOPWidget_);
     addDockWidget(Qt::TopDockWidgetArea, m_DOPDockWidget);
-    connect(m_monitorPvtWrapper, &MonitorPvtWrapper::dopChanged, m_DOPWidget, &DOPWidget::addData);
-    connect(&m_updateTimer, &QTimer::timeout, m_DOPWidget, &DOPWidget::redraw);
+    connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
+    connect(&m_updateTimer, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
 
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
@@ -104,28 +81,28 @@ MainWindow::MainWindow(QWidget *parent)
     // QToolbar.
     m_start = ui->mainToolBar->addAction("Start");
     m_stop = ui->mainToolBar->addAction("Stop");
-    m_clear = ui->mainToolBar->addAction("Clear");
+    clear_ = ui->mainToolBar->addAction("Clear");
     ui->mainToolBar->addSeparator();
     m_closePlotsAction = ui->mainToolBar->addAction("Close Plots");
     ui->mainToolBar->addSeparator();
-    ui->mainToolBar->addAction(m_telecommandDockWidget->toggleViewAction());
-    ui->mainToolBar->addAction(m_mapDockWidget->toggleViewAction());
-    ui->mainToolBar->addAction(m_altitudeDockWidget->toggleViewAction());
+    ui->mainToolBar->addAction(telecommandDockWidget_->toggleViewAction());
+    ui->mainToolBar->addAction(mapDockWidget_->toggleViewAction());
+    ui->mainToolBar->addAction(altitudeDockWidget_->toggleViewAction());
     ui->mainToolBar->addAction(m_DOPDockWidget->toggleViewAction());
     m_start->setEnabled(false);
     m_stop->setEnabled(true);
-    m_clear->setEnabled(false);
+    clear_->setEnabled(false);
     connect(m_start, &QAction::triggered, this, &MainWindow::toggleCapture);
     connect(m_stop, &QAction::triggered, this, &MainWindow::toggleCapture);
-    connect(m_clear, &QAction::triggered, this, &MainWindow::clearEntries);
+    connect(clear_, &QAction::triggered, this, &MainWindow::clearEntries);
     connect(m_closePlotsAction, &QAction::triggered, this, &MainWindow::closePlots);
 
     // Model.
-    m_model = new ChannelTableModel();
+    model_ = new ChannelTableModel();
 
     // QTableView.
     // Tie the model to the view.
-    ui->tableView->setModel(m_model);
+    ui->tableView->setModel(model_);
     ui->tableView->setShowGrid(false);
     ui->tableView->verticalHeader()->hide();
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
@@ -216,8 +193,8 @@ void MainWindow::receiveGnssSynchro()
 
         if (m_stop->isEnabled())
         {
-            m_model->populateChannels(&m_stocks);
-            m_clear->setEnabled(true);
+            model_->populateChannels(&m_stocks);
+            clear_->setEnabled(true);
         }
     }
     if (newData && !m_updateTimer.isActive())
@@ -236,7 +213,7 @@ void MainWindow::receiveMonitorPvt()
 
         if (m_stop->isEnabled())
         {
-            m_monitorPvtWrapper->addMonitorPvt(m_monitorPvt);
+            monitorPvtWrapper_->addMonitorPvt(m_monitorPvt);
             // clear->setEnabled(true);
         }
     }
@@ -244,13 +221,13 @@ void MainWindow::receiveMonitorPvt()
 
 void MainWindow::clearEntries()
 {
-    m_model->clearChannels();
-    m_model->update();
+    model_->clearChannels();
+    model_->update();
 
-    m_altitudeWidget->clear();
-    m_DOPWidget->clear();
+    altitudeWidget_->clear();
+    DOPWidget_->clear();
 
-    m_clear->setEnabled(false);
+    clear_->setEnabled(false);
 }
 
 void MainWindow::quit() { saveSettings(); }
@@ -294,7 +271,7 @@ void MainWindow::saveSettings()
 
     m_settings.beginGroup("tableView");
     m_settings.beginWriteArray("column");
-    for (int i = 0; i < m_model->getColumns(); i++)
+    for (int i = 0; i < model_->getColumns(); i++)
     {
         m_settings.setArrayIndex(i);
         m_settings.setValue("width", ui->tableView->columnWidth(i));
@@ -314,7 +291,7 @@ void MainWindow::loadSettings()
 
     m_settings.beginGroup("tableView");
     m_settings.beginReadArray("column");
-    for (int i = 0; i < m_model->getColumns(); i++)
+    for (int i = 0; i < model_->getColumns(); i++)
     {
         m_settings.setArrayIndex(i);
         ui->tableView->setColumnWidth(i, m_settings.value("width", 100).toInt());
@@ -330,7 +307,7 @@ void MainWindow::loadSettings()
 void MainWindow::showPreferences()
 {
     PreferencesDialog *preferences = new PreferencesDialog(this);
-    connect(preferences, &PreferencesDialog::accepted, m_model,
+    connect(preferences, &PreferencesDialog::accepted, model_,
         &ChannelTableModel::setBufferSize);
     connect(preferences, &PreferencesDialog::accepted, this,
         &MainWindow::setPort);
@@ -354,7 +331,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
 {
     qDebug() << index;
 
-    int channel_id = m_model->getChannelId(index.row());
+    int channel_id = model_->getChannelId(index.row());
 
     QChartView *chartView = nullptr;
 

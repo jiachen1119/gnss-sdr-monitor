@@ -50,7 +50,7 @@ AltitudeWidget::AltitudeWidget(QWidget *parent) : QWidget(parent)
     m_series = new QtCharts::QLineSeries();
     m_chartView = new QtCharts::QChartView(this);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout(this);
     this->setLayout(layout);
     layout->addWidget(m_chartView);
 
