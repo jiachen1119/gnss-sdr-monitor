@@ -33,14 +33,14 @@ Map
         line.width: 3
         line.color: "red"
         opacity: 0.3
-        path: m_monitor_pvt_wrapper.path
+        path: monitor_pvt_wrapper_.path
         visible: show_path.checked
     }
 
     MapQuickItem // Current position of the vehicle.
     {
         id: vehicle
-        coordinate: m_monitor_pvt_wrapper.position
+        coordinate: monitor_pvt_wrapper_.position
 
         anchorPoint.x: icon.width/2
         anchorPoint.y: icon.height/2
@@ -76,11 +76,11 @@ Map
     Connections
     {
         target: vehicle
-        function onCoordinateChanged()
+        onCoordinateChanged:
         {
             if (follow.checked)
             {
-                map.center = m_monitor_pvt_wrapper.position;
+                map.center = monitor_pvt_wrapper_.position;
             }
         }
     }

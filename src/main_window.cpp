@@ -27,9 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     // Use a timer to delay updating the model to a fixed amount of times per
     // second.
-    m_updateTimer.setInterval(500);
-    m_updateTimer.setSingleShot(true);
-    connect(&m_updateTimer, &QTimer::timeout, [this] { model_->update(); });
+    updateTimer_.setInterval(500);
+    updateTimer_.setSingleShot(true);
+    connect(&updateTimer_, &QTimer::timeout, [this] { model_->update(); });
 
     ui->setupUi(this);
 
@@ -46,8 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Map widget.
     mapDockWidget_ = new QDockWidget("Map", this);
     mapWidget_ = new QQuickWidget(this);
-    mapWidget_->rootContext()->setContextProperty("m_monitor_pvt_wrapper", monitorPvtWrapper_);
-    mapWidget_->setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+    mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
+    mapWidget_->setSource(QUrl("src:/qml/main.qml"));
     mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mapDockWidget_->setWidget(mapWidget_);
     addDockWidget(Qt::TopDockWidgetArea, mapDockWidget_);
@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     altitudeDockWidget_->setWidget(altitudeWidget_);
     addDockWidget(Qt::TopDockWidgetArea, altitudeDockWidget_);
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitudeWidget_, &AltitudeWidget::addData);
-    connect(&m_updateTimer, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
+    connect(&updateTimer_, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
 
     // Dilution of precision widget.
     DOPDockWidget_ = new QDockWidget("DOP", this);
@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     DOPDockWidget_->setWidget(DOPWidget_);
     addDockWidget(Qt::TopDockWidgetArea, DOPDockWidget_);
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
-    connect(&m_updateTimer, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
+    connect(&updateTimer_, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
 
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
@@ -114,12 +114,12 @@ MainWindow::MainWindow(QWidget *parent)
     // ui->tableView->setSelectionBehavior(QTableView::SelectRows);
 
     // Sockets.
-    m_socketGnssSynchro = new QUdpSocket(this);
-    m_socketMonitorPvt = new QUdpSocket(this);
+    socketGnssSynchro_ = new QUdpSocket(this);
+    socketMonitorPvt_ = new QUdpSocket(this);
 
     // Connect Signals & Slots.
-    connect(m_socketGnssSynchro, &QUdpSocket::readyRead, this, &MainWindow::receiveGnssSynchro);
-    connect(m_socketMonitorPvt, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
+    connect(socketGnssSynchro_, &QUdpSocket::readyRead, this, &MainWindow::receiveGnssSynchro);
+    connect(socketMonitorPvt_, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
     connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
@@ -185,10 +185,10 @@ void MainWindow::toggleCapture()
 void MainWindow::receiveGnssSynchro()
 {
     bool newData = false;
-    while (m_socketGnssSynchro->hasPendingDatagrams())
+    while (socketGnssSynchro_->hasPendingDatagrams())
     {
         newData = true;
-        QNetworkDatagram datagram = m_socketGnssSynchro->receiveDatagram();
+        QNetworkDatagram datagram = socketGnssSynchro_->receiveDatagram();
         m_stocks = readGnssSynchro(datagram.data().data(), datagram.data().size());
 
         if (stop_->isEnabled())
@@ -197,17 +197,17 @@ void MainWindow::receiveGnssSynchro()
             clear_->setEnabled(true);
         }
     }
-    if (newData && !m_updateTimer.isActive())
+    if (newData && !updateTimer_.isActive())
     {
-        m_updateTimer.start();
+        updateTimer_.start();
     }
 }
 
 void MainWindow::receiveMonitorPvt()
 {
-    while (m_socketMonitorPvt->hasPendingDatagrams())
+    while (socketMonitorPvt_->hasPendingDatagrams())
     {
-        QNetworkDatagram datagram = m_socketMonitorPvt->receiveDatagram();
+        QNetworkDatagram datagram = socketMonitorPvt_->receiveDatagram();
         m_monitorPvt =
             readMonitorPvt(datagram.data().data(), datagram.data().size());
 
@@ -322,9 +322,9 @@ void MainWindow::setPort()
     m_portMonitorPvt = settings.value("port_monitor_pvt", 1112).toInt();
     settings.endGroup();
 
-    m_socketGnssSynchro->disconnectFromHost();
-    m_socketGnssSynchro->bind(QHostAddress::Any, m_portGnssSynchro);
-    m_socketMonitorPvt->bind(QHostAddress::Any, m_portMonitorPvt);
+    socketGnssSynchro_->disconnectFromHost();
+    socketGnssSynchro_->bind(QHostAddress::Any, m_portGnssSynchro);
+    socketMonitorPvt_->bind(QHostAddress::Any, m_portMonitorPvt);
 }
 
 void MainWindow::expandPlot(const QModelIndex &index)
@@ -367,7 +367,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsConstellation_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&m_updateTimer, &QTimer::timeout, chart, [this, chart, series, index]() {
+            connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
                 updateChart(chart, series, index);
             });
 
@@ -409,7 +409,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsCn0_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&m_updateTimer, &QTimer::timeout, chart, [this, chart, series, index]() {
+            connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
                 updateChart(chart, series, index);
             });
 
@@ -451,7 +451,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsDoppler_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&m_updateTimer, &QTimer::timeout, chart, [this, chart, series, index]() {
+            connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
                 updateChart(chart, series, index);
             });
 

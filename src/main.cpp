@@ -33,6 +33,7 @@
 #include "main_window.h"
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QNetworkProxyFactory>
 #include <QStyle>
 
 int main(int argc, char *argv[])
@@ -42,6 +43,8 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain("gnss-sdr.org");
     app.setApplicationName("gnss-sdr-monitor");
 
+    // 启用系统代理配置
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
     MainWindow w;
     w.show();
 

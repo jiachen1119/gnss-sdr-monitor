@@ -83,8 +83,8 @@ private:
     DOPWidget *DOPWidget_;
 
     ChannelTableModel *model_;
-    QUdpSocket *m_socketGnssSynchro;
-    QUdpSocket *m_socketMonitorPvt;
+    QUdpSocket *socketGnssSynchro_;
+    QUdpSocket *socketMonitorPvt_;
     gnss_sdr::Observables m_stocks;
     MonitorPvtWrapper *monitorPvtWrapper_;
     gnss_sdr::MonitorPvt m_monitorPvt;
@@ -92,7 +92,7 @@ private:
     quint16 m_portGnssSynchro;
     quint16 m_portMonitorPvt;
     QSettings m_settings;
-    QTimer m_updateTimer;
+    QTimer updateTimer_;
 
     QAction *start_;
     QAction *stop_;
