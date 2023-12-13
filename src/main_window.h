@@ -75,7 +75,7 @@ private:
     QDockWidget *mapDockWidget_;
     QDockWidget *telecommandDockWidget_;
     QDockWidget *altitudeDockWidget_;
-    QDockWidget *m_DOPDockWidget;
+    QDockWidget *DOPDockWidget_;
 
     QQuickWidget *mapWidget_;
     TelecommandWidget *telecommandWidget_;
@@ -94,16 +94,16 @@ private:
     QSettings m_settings;
     QTimer m_updateTimer;
 
-    QAction *m_start;
-    QAction *m_stop;
+    QAction *start_;
+    QAction *stop_;
     QAction *clear_;
-    QAction *m_closePlotsAction;
+    QAction *closePlotsAction_;
 
-    int m_bufferSize;
+    int bufferSize_;
 
-    std::map<int, QtCharts::QChartView *> m_plotsConstellation;
-    std::map<int, QtCharts::QChartView *> m_plotsCn0;
-    std::map<int, QtCharts::QChartView *> m_plotsDoppler;
+    std::map<int, QtCharts::QChartView *> plotsConstellation_;
+    std::map<int, QtCharts::QChartView *> plotsCn0_;
+    std::map<int, QtCharts::QChartView *> plotsDoppler_;
 };
 
 #endif  // GNSS_SDR_MONITOR_MAIN_WINDOW_H_

@@ -61,10 +61,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&m_updateTimer, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
 
     // Dilution of precision widget.
-    m_DOPDockWidget = new QDockWidget("DOP", this);
-    DOPWidget_ = new DOPWidget(m_DOPDockWidget);
-    m_DOPDockWidget->setWidget(DOPWidget_);
-    addDockWidget(Qt::TopDockWidgetArea, m_DOPDockWidget);
+    DOPDockWidget_ = new QDockWidget("DOP", this);
+    DOPWidget_ = new DOPWidget(DOPDockWidget_);
+    DOPDockWidget_->setWidget(DOPWidget_);
+    addDockWidget(Qt::TopDockWidgetArea, DOPDockWidget_);
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
     connect(&m_updateTimer, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
 
@@ -79,23 +79,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionPreferences, &QAction::triggered, this, &MainWindow::showPreferences);
 
     // QToolbar.
-    m_start = ui->mainToolBar->addAction("Start");
-    m_stop = ui->mainToolBar->addAction("Stop");
+    start_ = ui->mainToolBar->addAction("Start");
+    stop_ = ui->mainToolBar->addAction("Stop");
     clear_ = ui->mainToolBar->addAction("Clear");
     ui->mainToolBar->addSeparator();
-    m_closePlotsAction = ui->mainToolBar->addAction("Close Plots");
+    closePlotsAction_ = ui->mainToolBar->addAction("Close Plots");
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(telecommandDockWidget_->toggleViewAction());
     ui->mainToolBar->addAction(mapDockWidget_->toggleViewAction());
     ui->mainToolBar->addAction(altitudeDockWidget_->toggleViewAction());
-    ui->mainToolBar->addAction(m_DOPDockWidget->toggleViewAction());
-    m_start->setEnabled(false);
-    m_stop->setEnabled(true);
+    ui->mainToolBar->addAction(DOPDockWidget_->toggleViewAction());
+    start_->setEnabled(false);
+    stop_->setEnabled(true);
     clear_->setEnabled(false);
-    connect(m_start, &QAction::triggered, this, &MainWindow::toggleCapture);
-    connect(m_stop, &QAction::triggered, this, &MainWindow::toggleCapture);
+    connect(start_, &QAction::triggered, this, &MainWindow::toggleCapture);
+    connect(stop_, &QAction::triggered, this, &MainWindow::toggleCapture);
     connect(clear_, &QAction::triggered, this, &MainWindow::clearEntries);
-    connect(m_closePlotsAction, &QAction::triggered, this, &MainWindow::closePlots);
+    connect(closePlotsAction_, &QAction::triggered, this, &MainWindow::closePlots);
 
     // Model.
     model_ = new ChannelTableModel();
@@ -170,15 +170,15 @@ void MainWindow::updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *serie
 
 void MainWindow::toggleCapture()
 {
-    if (m_start->isEnabled())
+    if (start_->isEnabled())
     {
-        m_start->setEnabled(false);
-        m_stop->setEnabled(true);
+        start_->setEnabled(false);
+        stop_->setEnabled(true);
     }
     else
     {
-        m_start->setEnabled(true);
-        m_stop->setEnabled(false);
+        start_->setEnabled(true);
+        stop_->setEnabled(false);
     }
 }
 
@@ -191,7 +191,7 @@ void MainWindow::receiveGnssSynchro()
         QNetworkDatagram datagram = m_socketGnssSynchro->receiveDatagram();
         m_stocks = readGnssSynchro(datagram.data().data(), datagram.data().size());
 
-        if (m_stop->isEnabled())
+        if (stop_->isEnabled())
         {
             model_->populateChannels(&m_stocks);
             clear_->setEnabled(true);
@@ -211,7 +211,7 @@ void MainWindow::receiveMonitorPvt()
         m_monitorPvt =
             readMonitorPvt(datagram.data().data(), datagram.data().size());
 
-        if (m_stop->isEnabled())
+        if (stop_->isEnabled())
         {
             monitorPvtWrapper_->addMonitorPvt(m_monitorPvt);
             // clear->setEnabled(true);
@@ -337,7 +337,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
     if (index.column() == 5)  // Constellation
     {
-        if (m_plotsConstellation.find(index.row()) == m_plotsConstellation.end())
+        if (plotsConstellation_.find(index.row()) == plotsConstellation_.end())
         {
             QChart *chart = new QChart();  // has no parent!
             chart->setTitle("Constellation CH " + QString::number(channel_id));
@@ -364,23 +364,23 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
             // Remove element from map when chartView widget is closed.
             connect(chartView, &QObject::destroyed,
-                [this, index]() { m_plotsConstellation.erase(index.row()); });
+                [this, index]() { plotsConstellation_.erase(index.row()); });
 
             // Update chart on timer timeout.
             connect(&m_updateTimer, &QTimer::timeout, chart, [this, chart, series, index]() {
                 updateChart(chart, series, index);
             });
 
-            m_plotsConstellation[index.row()] = chartView;
+            plotsConstellation_[index.row()] = chartView;
         }
         else
         {
-            chartView = m_plotsConstellation.at(index.row());
+            chartView = plotsConstellation_.at(index.row());
         }
     }
     else if (index.column() == 6)  // CN0
     {
-        if (m_plotsCn0.find(index.row()) == m_plotsCn0.end())
+        if (plotsCn0_.find(index.row()) == plotsCn0_.end())
         {
             QChart *chart = new QChart();  // has no parent!
             chart->setTitle("CN0 CH " + QString::number(channel_id));
@@ -406,23 +406,23 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
             // Remove element from map when chartView widget is closed.
             connect(chartView, &QObject::destroyed,
-                [this, index]() { m_plotsCn0.erase(index.row()); });
+                [this, index]() { plotsCn0_.erase(index.row()); });
 
             // Update chart on timer timeout.
             connect(&m_updateTimer, &QTimer::timeout, chart, [this, chart, series, index]() {
                 updateChart(chart, series, index);
             });
 
-            m_plotsCn0[index.row()] = chartView;
+            plotsCn0_[index.row()] = chartView;
         }
         else
         {
-            chartView = m_plotsCn0.at(index.row());
+            chartView = plotsCn0_.at(index.row());
         }
     }
     else if (index.column() == 7)  // Doppler
     {
-        if (m_plotsDoppler.find(index.row()) == m_plotsDoppler.end())
+        if (plotsDoppler_.find(index.row()) == plotsDoppler_.end())
         {
             QChart *chart = new QChart();  // has no parent!
             chart->setTitle("Doppler CH " + QString::number(channel_id));
@@ -448,18 +448,18 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
             // Remove element from map when chartView widget is closed.
             connect(chartView, &QObject::destroyed,
-                [this, index]() { m_plotsDoppler.erase(index.row()); });
+                [this, index]() { plotsDoppler_.erase(index.row()); });
 
             // Update chart on timer timeout.
             connect(&m_updateTimer, &QTimer::timeout, chart, [this, chart, series, index]() {
                 updateChart(chart, series, index);
             });
 
-            m_plotsDoppler[index.row()] = chartView;
+            plotsDoppler_[index.row()] = chartView;
         }
         else
         {
-            chartView = m_plotsDoppler.at(index.row());
+            chartView = plotsDoppler_.at(index.row());
         }
     }
 
@@ -474,19 +474,19 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
 void MainWindow::closePlots()
 {
-    for (auto const &ch : m_plotsConstellation)
+    for (auto const &ch : plotsConstellation_)
     {
         auto const &chartView = ch.second;
         chartView->close();
     }
 
-    for (auto const &ch : m_plotsCn0)
+    for (auto const &ch : plotsCn0_)
     {
         auto const &chartView = ch.second;
         chartView->close();
     }
 
-    for (auto const &ch : m_plotsDoppler)
+    for (auto const &ch : plotsDoppler_)
     {
         auto const &chartView = ch.second;
         chartView->close();
@@ -495,26 +495,26 @@ void MainWindow::closePlots()
 
 void MainWindow::deletePlots()
 {
-    for (auto const &ch : m_plotsConstellation)
+    for (auto const &ch : plotsConstellation_)
     {
         auto const &chartView = ch.second;
         chartView->deleteLater();
     }
-    m_plotsConstellation.clear();
+    plotsConstellation_.clear();
 
-    for (auto const &ch : m_plotsCn0)
+    for (auto const &ch : plotsCn0_)
     {
         auto const &chartView = ch.second;
         chartView->deleteLater();
     }
-    m_plotsCn0.clear();
+    plotsCn0_.clear();
 
-    for (auto const &ch : m_plotsDoppler)
+    for (auto const &ch : plotsDoppler_)
     {
         auto const &chartView = ch.second;
         chartView->deleteLater();
     }
-    m_plotsDoppler.clear();
+    plotsDoppler_.clear();
 }
 
 void MainWindow::about()
