@@ -25,6 +25,11 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    QScreen *screen=QGuiApplication::primaryScreen();
+    QRect size=screen->availableGeometry();
+    screenHeight_=size.height();
+    screenWidth_=size.width();
+
     // Use a timer to delay updating the model to a fixed amount of times per
     // second.
     updateTimer_.setInterval(500);
@@ -40,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     telecommandDockWidget_ = new QDockWidget("Telecommand", this);
     telecommandWidget_ = new TelecommandWidget(telecommandDockWidget_);
     telecommandDockWidget_->setWidget(telecommandWidget_);
+    telecommandDockWidget_->setMaximumWidth(this->size().width()/2);
     addDockWidget(Qt::TopDockWidgetArea, telecommandDockWidget_);
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
@@ -67,6 +73,10 @@ MainWindow::MainWindow(QWidget *parent)
     addDockWidget(Qt::TopDockWidgetArea, DOPDockWidget_);
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
     connect(&updateTimer_, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
+
+    QMainWindow::tabifyDockWidget(DOPDockWidget_,altitudeDockWidget_);
+    QMainWindow::tabifyDockWidget(altitudeDockWidget_,mapDockWidget_);
+    DOPDockWidget_->raise();
 
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
@@ -110,6 +120,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableView->setItemDelegateForColumn(6, new Cn0Delegate());
     ui->tableView->setItemDelegateForColumn(7, new DopplerDelegate());
     ui->tableView->setItemDelegateForColumn(9, new LedDelegate());
+
+    ui->tableView->resizeColumnsToContents();
     // ui->tableView->setAlternatingRowColors(true);
     // ui->tableView->setSelectionBehavior(QTableView::SelectRows);
 
@@ -122,6 +134,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(socketMonitorPvt_, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
     connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
+    connect(ui->tableView, &QTableView::doubleClicked, this, &MainWindow::expandPlot);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
@@ -167,6 +180,35 @@ void MainWindow::updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *serie
     chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
     chart->axes(Qt::Vertical).back()->setRange(min_y, max_y);
 }
+
+void MainWindow::updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index)
+{
+    QPointF p;
+    QVector<QPointF> points;
+
+    double min_x = std::numeric_limits<double>::max();
+    double max_x = -std::numeric_limits<double>::max();
+
+    double min_y = std::numeric_limits<double>::max();
+    double max_y = -std::numeric_limits<double>::max();
+
+    QList<QVariant> var = index.data(Qt::DisplayRole).toList();
+    for (const auto & i : var)
+    {
+        p = i.toPointF();
+        points << p;
+
+        min_x = std::min(min_x, p.x());
+        min_y = std::min(min_y, p.y());
+
+        max_x = std::max(max_x, p.x());
+        max_y = std::max(max_y, p.y());
+    }
+    chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
+    chart->axes(Qt::Vertical).back()->setRange(10, 55);
+    series->replace(points);
+}
+
 
 void MainWindow::toggleCapture()
 {
@@ -391,6 +433,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
             chart->createDefaultAxes();
             chart->axes(Qt::Horizontal).back()->setTitleText("TOW [s]");
             chart->axes(Qt::Vertical).back()->setTitleText("C/N0 [db-Hz]");
+            chart->axes(Qt::Vertical).back()->setRange(10,55);
             chart->layout()->setContentsMargins(0, 0, 0, 0);
             chart->setContentsMargins(-18, -18, -14, -16);
 
@@ -399,7 +442,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
             chartView->setContentsMargins(0, 0, 0, 0);
 
             // Draw chart now.
-            updateChart(chart, series, index);
+            updateCnoChart(chart, series, index);
 
             // Delete the chartView object when MainWindow is closed.
             connect(this, &QMainWindow::destroyed, chartView, &QObject::deleteLater);
@@ -410,7 +453,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
             // Update chart on timer timeout.
             connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
-                updateChart(chart, series, index);
+                updateCnoChart(chart, series, index);
             });
 
             plotsCn0_[index.row()] = chartView;
@@ -468,8 +511,9 @@ void MainWindow::expandPlot(const QModelIndex &index)
         return;
     }
 
-    chartView->resize(400, 180);
+    chartView->resize(screenWidth_/2, screenHeight_/2);
     chartView->show();
+    chartView->raise();
 }
 
 void MainWindow::closePlots()

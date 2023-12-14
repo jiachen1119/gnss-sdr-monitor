@@ -38,10 +38,13 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     app.setOrganizationName("gnss-sdr");
     app.setOrganizationDomain("gnss-sdr.org");
     app.setApplicationName("gnss-sdr-monitor");
+
+    app.setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     // 启用系统代理配置
     QNetworkProxyFactory::setUseSystemConfiguration(true);

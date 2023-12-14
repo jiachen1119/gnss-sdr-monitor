@@ -28,6 +28,7 @@
 #include <QXYSeries>
 #include <QtNetwork/QUdpSocket>
 
+
 namespace Ui
 {
 class MainWindow;
@@ -69,8 +70,12 @@ protected:
 
 private:
     void updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
+    void updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
 
     Ui::MainWindow *ui;
+
+    int screenWidth_;
+    int screenHeight_;
 
     QDockWidget *mapDockWidget_;
     QDockWidget *telecommandDockWidget_;
