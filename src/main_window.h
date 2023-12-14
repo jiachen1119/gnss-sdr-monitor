@@ -96,7 +96,7 @@ private:
     std::vector<int> m_channels;
     quint16 m_portGnssSynchro;
     quint16 m_portMonitorPvt;
-    QSettings m_settings;
+    QSettings settings_;
     QTimer updateTimer_;
 
     QAction *start_;

@@ -306,44 +306,43 @@ gnss_sdr::MonitorPvt MainWindow::readMonitorPvt(char buff[], int bytes)
 
 void MainWindow::saveSettings()
 {
-    m_settings.beginGroup("Main_Window");
-    m_settings.setValue("pos", pos());
-    m_settings.setValue("size", size());
-    m_settings.endGroup();
+    settings_.beginGroup("Main_Window");
+    // 记录MainWindow的位置和大小
+    settings_.setValue("pos", pos());
+    settings_.setValue("size", size());
+    settings_.endGroup();
 
-    m_settings.beginGroup("tableView");
-    m_settings.beginWriteArray("column");
+    settings_.beginGroup("tableView");
+    settings_.beginWriteArray("column");
     for (int i = 0; i < model_->getColumns(); i++)
     {
-        m_settings.setArrayIndex(i);
-        m_settings.setValue("width", ui->tableView->columnWidth(i));
+        settings_.setArrayIndex(i);
+        settings_.setValue("width", ui->tableView->columnWidth(i));
     }
-    m_settings.endArray();
-    m_settings.endGroup();
+    settings_.endArray();
+    settings_.endGroup();
 
     qDebug() << "Settings Saved";
 }
 
 void MainWindow::loadSettings()
 {
-    m_settings.beginGroup("Main_Window");
-    move(m_settings.value("pos", QPoint(0, 0)).toPoint());
-    resize(m_settings.value("size", QSize(1400, 600)).toSize());
-    m_settings.endGroup();
+    settings_.beginGroup("Main_Window");
+    move(settings_.value("pos", QPoint(0, 0)).toPoint());
+    resize(settings_.value("size", QSize(1400, 600)).toSize());
+    settings_.endGroup();
 
-    m_settings.beginGroup("tableView");
-    m_settings.beginReadArray("column");
+    settings_.beginGroup("tableView");
+    settings_.beginReadArray("column");
     for (int i = 0; i < model_->getColumns(); i++)
     {
-        m_settings.setArrayIndex(i);
-        ui->tableView->setColumnWidth(i, m_settings.value("width", 100).toInt());
+        settings_.setArrayIndex(i);
+        ui->tableView->setColumnWidth(i, settings_.value("width", 100).toInt());
     }
-    m_settings.endArray();
-    m_settings.endGroup();
+    settings_.endArray();
+    settings_.endGroup();
 
     setPort();
-
-    qDebug() << "Settings Loaded";
 }
 
 void MainWindow::showPreferences()
@@ -371,8 +370,6 @@ void MainWindow::setPort()
 
 void MainWindow::expandPlot(const QModelIndex &index)
 {
-    qDebug() << index;
-
     int channel_id = model_->getChannelId(index.row());
 
     QChartView *chartView = nullptr;
