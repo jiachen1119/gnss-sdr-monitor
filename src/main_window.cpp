@@ -3,7 +3,7 @@
  * \brief Implementation of the main window of the gui.
  *
  * \author Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com
- * Kepeng Luan changed, Southeast University, 2023
+ * Kepeng Luan changed, Southeast University, 2023-2024
  */
 
 
@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     mapDockWidget_ = new QDockWidget("Map", this);
     mapWidget_ = new QQuickWidget(this);
     mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
-    mapWidget_->setSource(QUrl("src:/qml/main.qml"));
+    mapWidget_->setSource(QUrl("qrc:/qml/main.qml"));
     mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mapDockWidget_->setWidget(mapWidget_);
     addDockWidget(Qt::TopDockWidgetArea, mapDockWidget_);
