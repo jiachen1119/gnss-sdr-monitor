@@ -311,8 +311,6 @@ void TelecommandWidget::loadSettings()
     setAddress(settings_.value("address", "").toString());
     setPort(settings_.value("port", "").toString());
     settings_.endGroup();
-
-    qDebug() << "Settings Loaded";
 }
 
 QString TelecommandWidget::getArgs()

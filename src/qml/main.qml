@@ -14,7 +14,7 @@ Rectangle {
         anchors.fill: parent
         plugin: myPlugin;
         center: QtPositioning.coordinate(32.0584359, 118.7888270)
-        zoomLevel: 15
+        zoomLevel: 19
 
         Plugin {
             id: myPlugin

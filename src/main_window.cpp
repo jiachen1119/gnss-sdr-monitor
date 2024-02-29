@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mapDockWidget_->setWidget(mapWidget_);
     addDockWidget(Qt::TopDockWidgetArea, mapDockWidget_);
+    mapDockWidget_->raise();
 
     // Altitude widget.
     altitudeDockWidget_ = new QDockWidget("Altitude", this);
@@ -76,7 +77,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QMainWindow::tabifyDockWidget(DOPDockWidget_,altitudeDockWidget_);
     QMainWindow::tabifyDockWidget(altitudeDockWidget_,mapDockWidget_);
-    DOPDockWidget_->raise();
 
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
