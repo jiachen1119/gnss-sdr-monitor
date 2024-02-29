@@ -126,11 +126,15 @@ MainWindow::MainWindow(QWidget *parent)
     // ui->tableView->setSelectionBehavior(QTableView::SelectRows);
 
     // Sockets.
-    socketGnssSynchro_ = new QUdpSocket(this);
+    socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1111);
     socketMonitorPvt_ = new QUdpSocket(this);
+    socketGnssSynchro_->start();
 
     // Connect Signals & Slots.
-    connect(socketGnssSynchro_, &QUdpSocket::readyRead, this, &MainWindow::receiveGnssSynchro);
+    qRegisterMetaType<gnss_sdr::Observables>("gnss_sdr::Observables");
+    connect(socketGnssSynchro_.get(), &SocketGnss::sendData, this, &MainWindow::receiveGnssSynchro);
+//    connect(qApp,&QApplication::aboutToQuit,socketGnssSynchro_.get(),&SocketGnss::stopThread);
+
     connect(socketMonitorPvt_, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
     connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
@@ -224,22 +228,15 @@ void MainWindow::toggleCapture()
     }
 }
 
-void MainWindow::receiveGnssSynchro()
+void MainWindow::receiveGnssSynchro(gnss_sdr::Observables stocks)
 {
-    bool newData = false;
-    while (socketGnssSynchro_->hasPendingDatagrams())
+    m_stocks=std::move(stocks);
+    if (stop_->isEnabled())
     {
-        newData = true;
-        QNetworkDatagram datagram = socketGnssSynchro_->receiveDatagram();
-        m_stocks = readGnssSynchro(datagram.data().data(), datagram.data().size());
-
-        if (stop_->isEnabled())
-        {
-            model_->populateChannels(&m_stocks);
-            clear_->setEnabled(true);
-        }
+        model_->populateChannels(&m_stocks);
+        clear_->setEnabled(true);
     }
-    if (newData && !updateTimer_.isActive())
+    if (!updateTimer_.isActive())
     {
         updateTimer_.start();
     }
@@ -363,8 +360,7 @@ void MainWindow::setPort()
     m_portMonitorPvt = settings.value("port_monitor_pvt", 1112).toInt();
     settings.endGroup();
 
-    socketGnssSynchro_->disconnectFromHost();
-    socketGnssSynchro_->bind(QHostAddress::Any, m_portGnssSynchro);
+    socketGnssSynchro_->setPort(m_portGnssSynchro);
     socketMonitorPvt_->bind(QHostAddress::Any, m_portMonitorPvt);
 }
 

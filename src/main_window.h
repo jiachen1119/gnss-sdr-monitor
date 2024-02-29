@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QXYSeries>
 #include <QtNetwork/QUdpSocket>
+#include "socket/SocketGnss.h"
 
 
 namespace Ui
@@ -54,7 +55,7 @@ public:
 
 public slots:
     void toggleCapture();
-    void receiveGnssSynchro();
+    void receiveGnssSynchro(gnss_sdr::Observables stocks);
     void receiveMonitorPvt();
     void clearEntries();
     void quit();
@@ -88,7 +89,8 @@ private:
     DOPWidget *DOPWidget_;
 
     ChannelTableModel *model_;
-    QUdpSocket *socketGnssSynchro_;
+
+    std::unique_ptr<SocketGnss> socketGnssSynchro_;
     QUdpSocket *socketMonitorPvt_;
     gnss_sdr::Observables m_stocks;
     MonitorPvtWrapper *monitorPvtWrapper_;
