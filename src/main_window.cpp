@@ -133,7 +133,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Connect Signals & Slots.
     qRegisterMetaType<gnss_sdr::Observables>("gnss_sdr::Observables");
     connect(socketGnssSynchro_.get(), &SocketGnss::sendData, this, &MainWindow::receiveGnssSynchro);
-//    connect(qApp,&QApplication::aboutToQuit,socketGnssSynchro_.get(),&SocketGnss::stopThread);
+    connect(qApp,&QApplication::aboutToQuit,socketGnssSynchro_.get(),&SocketGnss::stopThread);
 
     connect(socketMonitorPvt_, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
     connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
@@ -318,8 +318,6 @@ void MainWindow::saveSettings()
     }
     settings_.endArray();
     settings_.endGroup();
-
-    qDebug() << "Settings Saved";
 }
 
 void MainWindow::loadSettings()

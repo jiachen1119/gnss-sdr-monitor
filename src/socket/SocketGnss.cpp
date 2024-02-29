@@ -11,14 +11,15 @@ SocketGnss::SocketGnss(QObject *parent,quint16 port): QThread(parent)
 
 void SocketGnss::run()
 {
-    std::unique_ptr<QUdpSocket> socketGnssSynchro_ = std::make_unique<QUdpSocket>(nullptr);
-    socketGnssSynchro_->disconnectFromHost();
+    std::unique_ptr<QUdpSocket> socketGnssSynchro_ = std::make_unique<QUdpSocket>();
+    socketGnssSynchro_->abort();
+    QThread::msleep(500);
     if (!socketGnssSynchro_->bind(QHostAddress::LocalHost, port_)) {
         qDebug() << "Failed to bind UDP socket to port " << port_;
         return;
     }
 
-    while (socketGnssSynchro_->state() == QAbstractSocket::BoundState){
+    while (socketGnssSynchro_->state() == QAbstractSocket::BoundState&&!threadStop_){
         while (socketGnssSynchro_->hasPendingDatagrams())
         {
             QNetworkDatagram datagram = socketGnssSynchro_->receiveDatagram();
@@ -26,6 +27,7 @@ void SocketGnss::run()
             emit sendData(stocks_);
         }
     }
+    socketGnssSynchro_->close();
 }
 
 void SocketGnss::readGnssSynchro(char *buff, int bytes)
