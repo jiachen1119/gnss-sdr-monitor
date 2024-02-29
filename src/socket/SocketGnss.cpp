@@ -13,6 +13,7 @@ void SocketGnss::run()
 {
     std::unique_ptr<QUdpSocket> socketGnssSynchro_ = std::make_unique<QUdpSocket>();
     socketGnssSynchro_->abort();
+    // 必须要加上延时环节
     QThread::msleep(500);
     if (!socketGnssSynchro_->bind(QHostAddress::LocalHost, port_)) {
         qDebug() << "Failed to bind UDP socket to port " << port_;
