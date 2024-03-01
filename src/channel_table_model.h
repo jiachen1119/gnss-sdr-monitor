@@ -43,6 +43,7 @@ class ChannelTableModel : public QAbstractTableModel
 public:
     //initialize the channel of gnss signals
     ChannelTableModel();
+
     // update the print
     void update();
 
@@ -57,21 +58,21 @@ public:
     int getChannelId(int row);
 
     // List of virtual functions that must be implemented in a read-only table model.
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    int rowCount(const QModelIndex &parent) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 public slots:
     gnss_sdr::GnssSynchro getChannelData(int key);
 
 protected:
-    int m_columns;
-    int m_bufferSize;
+    int columns_;
+    int bufferSize_;
     gnss_sdr::Observables m_stocks;
 
-    std::vector<int> m_channelsId;
-    std::map<int, gnss_sdr::GnssSynchro> m_channels;
+    std::vector<int> channelsId_;
+    std::map<int, gnss_sdr::GnssSynchro> channels_;
     std::map<int, QString> m_channelsSignal;
     std::map<int, boost::circular_buffer<double>> m_channelsTime;
     std::map<int, boost::circular_buffer<double>> m_channelsPromptI;

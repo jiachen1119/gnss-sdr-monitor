@@ -1,41 +1,7 @@
-/*!
- * \file channel_table_model.cpp
- * \brief Implementation of a model for storing the channels information
- * in a table-like data structure.
- *
- * \author Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com
- *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
- */
-
-
 #include "channel_table_model.h"
 #include <QDebug>
 #include <QList>
 #include <QtGui>
-#include <string.h>
 
 #define DEFAULT_BUFFER_SIZE 1000
 
@@ -52,8 +18,8 @@ ChannelTableModel::ChannelTableModel()
     mapSignalName_["5X"] = "E5a";
     mapSignalName_["L5"] = "L5";
 
-    m_columns = 11;
-    m_bufferSize = DEFAULT_BUFFER_SIZE;
+    columns_ = 11;
+    bufferSize_ = DEFAULT_BUFFER_SIZE;
 }
 
 /*!
@@ -65,25 +31,36 @@ void ChannelTableModel::update()
     endResetModel();
 }
 
+///
+/// \param parent (override)
+/// \return 返回正在跟踪的通道总数/行数
 int ChannelTableModel::rowCount(const QModelIndex &parent) const
 {
-    return m_channels.size();
+    return (int)channels_.size();
 }
 
+///
+/// \param parent (override)
+/// \return 返回表格的列数
 int ChannelTableModel::columnCount(const QModelIndex &parent) const
 {
-    return m_columns;
+    return columns_;
 }
 
+///
+/// \param index (override) 提供被查询的位置
+/// \param role itemDataRole 对应不同类型的数据呈现模式
+/// \return 返回对应的数据
 QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::DisplayRole || role == Qt::ToolTipRole || role == Qt::DecorationRole)
+    // 显示、悬停、图标
+    if (role == Qt::DisplayRole ||
+        role == Qt::ToolTipRole ||
+        role == Qt::DecorationRole)
     {
-        try
-        {
-            int channel_id = m_channelsId.at(index.row());
-
-            gnss_sdr::GnssSynchro channel = m_channels.at(channel_id);
+        try{
+            int channel_id = channelsId_.at(index.row());
+            gnss_sdr::GnssSynchro channel = channels_.at(channel_id);
 
             QString channel_signal = m_channelsSignal.at(channel_id);
 
@@ -289,10 +266,10 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
     if (ch->fs() != 0)
     {
         // Channel is valid, now check if it exists in the map of channels.
-        if (m_channels.find(ch->channel_id()) != m_channels.end())
+        if (channels_.find(ch->channel_id()) != channels_.end())
         {
             // Channel exists, now check if its PRN is the same.
-            if (m_channels.at(ch->channel_id()).prn() != ch->prn())
+            if (channels_.at(ch->channel_id()).prn() != ch->prn())
             {
                 // PRN has changed so reset the channel.
                 clearChannel(ch->channel_id());
@@ -300,17 +277,17 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         }
 
         // Check the size of the map of GnssSynchro objects before adding new data.
-        size_t map_size = m_channels.size();
+        size_t map_size = channels_.size();
 
         // Add the new GnssSynchro object to the map.
-        m_channels[ch->channel_id()] = *ch;
+        channels_[ch->channel_id()] = *ch;
 
         // Time.
         // Check if channel exists in the map of time data.
         if (m_channelsTime.find(ch->channel_id()) == m_channelsTime.end())
         {
             // Channel does not exist so make room for it.
-            m_channelsTime[ch->channel_id()].resize(m_bufferSize);
+            m_channelsTime[ch->channel_id()].resize(bufferSize_);
             m_channelsTime[ch->channel_id()].clear();
         }
         // Populate map with new time data.
@@ -321,7 +298,7 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         if (m_channelsPromptI.find(ch->channel_id()) == m_channelsPromptI.end())
         {
             // Channel does not exist so make room for it.
-            m_channelsPromptI[ch->channel_id()].resize(m_bufferSize);
+            m_channelsPromptI[ch->channel_id()].resize(bufferSize_);
             m_channelsPromptI[ch->channel_id()].clear();
         }
         // Populate map with new in-phase component data.
@@ -332,7 +309,7 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         if (m_channelsPromptQ.find(ch->channel_id()) == m_channelsPromptQ.end())
         {
             // Channel does not exist so make room for it.
-            m_channelsPromptQ[ch->channel_id()].resize(m_bufferSize);
+            m_channelsPromptQ[ch->channel_id()].resize(bufferSize_);
             m_channelsPromptQ[ch->channel_id()].clear();
         }
         // Populate map with new quadrature component data.
@@ -343,7 +320,7 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         if (m_channelsCn0.find(ch->channel_id()) == m_channelsCn0.end())
         {
             // Channel does not exist so make room for it.
-            m_channelsCn0[ch->channel_id()].resize(m_bufferSize);
+            m_channelsCn0[ch->channel_id()].resize(bufferSize_);
             m_channelsCn0[ch->channel_id()].clear();
         }
         // Populate map with new CN0 data.
@@ -354,7 +331,7 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         if (m_channelsDoppler.find(ch->channel_id()) == m_channelsDoppler.end())
         {
             // Channel does not exist so make room for it.
-            m_channelsDoppler[ch->channel_id()].resize(m_bufferSize);
+            m_channelsDoppler[ch->channel_id()].resize(bufferSize_);
             m_channelsDoppler[ch->channel_id()].clear();
         }
         // Populate map with new Doppler data.
@@ -365,10 +342,10 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         m_channelsSignal[ch->channel_id()] = getSignalPrettyName(ch);
 
         // Check the size of the map of GnssSynchro objects after adding new data.
-        if (m_channels.size() != map_size)
+        if (channels_.size() != map_size)
         {
             // Map size has changed so record the new channel number in the vector of channel IDs.
-            m_channelsId.push_back(ch->channel_id());
+            channelsId_.push_back(ch->channel_id());
         }
     }
 }
@@ -378,9 +355,9 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
  */
 void ChannelTableModel::clearChannel(int ch_id)
 {
-    m_channelsId.erase(std::remove(m_channelsId.begin(), m_channelsId.end(), ch_id),
-        m_channelsId.end());
-    m_channels.erase(ch_id);
+    channelsId_.erase(std::remove(channelsId_.begin(), channelsId_.end(), ch_id),
+        channelsId_.end());
+    channels_.erase(ch_id);
     m_channelsSignal.erase(ch_id);
     m_channelsTime.erase(ch_id);
     m_channelsPromptI.erase(ch_id);
@@ -394,8 +371,8 @@ void ChannelTableModel::clearChannel(int ch_id)
  */
 void ChannelTableModel::clearChannels()
 {
-    m_channelsId.clear();
-    m_channels.clear();
+    channelsId_.clear();
+    channels_.clear();
     m_channelsSignal.clear();
     m_channelsTime.clear();
     m_channelsPromptI.clear();
@@ -451,7 +428,7 @@ QList<QVariant> ChannelTableModel::getListFromCbuf(boost::circular_buffer<double
  */
 int ChannelTableModel::getColumns()
 {
-    return m_columns;
+    return columns_;
 }
 
 /*!
@@ -464,7 +441,7 @@ void ChannelTableModel::setBufferSize()
     int size = settings.value("buffer_size", DEFAULT_BUFFER_SIZE).toInt();
     settings.endGroup();
 
-    m_bufferSize = size;
+    bufferSize_ = size;
     clearChannels();
 }
 
@@ -473,5 +450,5 @@ void ChannelTableModel::setBufferSize()
  */
 int ChannelTableModel::getChannelId(int row)
 {
-    return m_channelsId.at(row);
+    return channelsId_.at(row);
 }
