@@ -91,7 +91,7 @@ private:
 
     std::unique_ptr<SocketGnss> socketGnssSynchro_;
     QUdpSocket *socketMonitorPvt_;
-    gnss_sdr::Observables m_stocks;
+    gnss_sdr::Observables stocks_;
     MonitorPvtWrapper *monitorPvtWrapper_;
     gnss_sdr::MonitorPvt m_monitorPvt;
     std::vector<int> m_channels;

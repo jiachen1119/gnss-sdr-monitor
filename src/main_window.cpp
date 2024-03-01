@@ -227,10 +227,10 @@ void MainWindow::toggleCapture()
 
 void MainWindow::receiveGnssSynchro(gnss_sdr::Observables stocks)
 {
-    m_stocks=std::move(stocks);
+    stocks_ =std::move(stocks);
     if (stop_->isEnabled())
     {
-        model_->populateChannels(&m_stocks);
+        model_->populateChannels(&stocks_);
         clear_->setEnabled(true);
     }
     if (!updateTimer_.isActive())
