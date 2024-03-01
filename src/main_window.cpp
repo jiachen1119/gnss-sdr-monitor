@@ -162,25 +162,20 @@ void MainWindow::updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *serie
     QPointF p;
     QVector<QPointF> points;
 
-    double min_x = std::numeric_limits<double>::max();
-    double max_x = -std::numeric_limits<double>::max();
-
     double min_y = std::numeric_limits<double>::max();
     double max_y = -std::numeric_limits<double>::max();
 
     QList<QVariant> var = index.data(Qt::DisplayRole).toList();
-    for (int i = 0; i < var.size(); i++)
+    for (const auto & i : var)
     {
-        p = var.at(i).toPointF();
+        p = i.toPointF();
         points << p;
 
-        min_x = std::min(min_x, p.x());
         min_y = std::min(min_y, p.y());
-
-        max_x = std::max(max_x, p.x());
         max_y = std::max(max_y, p.y());
     }
-
+    double min_x = points.front().x();
+    double max_x = points.back().x();
     series->replace(points);
 
     chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
