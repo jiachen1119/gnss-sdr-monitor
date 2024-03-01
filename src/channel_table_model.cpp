@@ -221,6 +221,8 @@ QVariant ChannelTableModel::headerData(int section,
  */
 void ChannelTableModel::populateChannels(const gnss_sdr::Observables *stocks)
 {
+    // 这里存在一个问题就是一次只发送一个channel的数据，并不是预想的所有通道
+    // 通过observable全部发送过来
     for (int i = 0; i < stocks->observable_size(); i++){
         auto obs = stocks->observable(i);
         populateChannel(&obs);
