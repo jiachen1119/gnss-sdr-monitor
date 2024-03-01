@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Use a timer to delay updating the model to a fixed amount of times per
     // second.
-    updateTimer_.setInterval(500);
+    updateTimer_.setInterval(1000);
     updateTimer_.setSingleShot(true);
     connect(&updateTimer_, &QTimer::timeout, [this] { model_->update(); });
 
@@ -139,6 +139,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
     connect(ui->tableView, &QTableView::doubleClicked, this, &MainWindow::expandPlot);
+
+    // about project 和 about qt 弹出窗口
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 
@@ -271,21 +273,6 @@ void MainWindow::clearEntries()
 
 void MainWindow::quit() { saveSettings(); }
 
-gnss_sdr::Observables MainWindow::readGnssSynchro(char buff[], int bytes)
-{
-    try
-    {
-        std::string data(buff, bytes);
-        m_stocks.ParseFromString(data);
-    }
-    catch (std::exception &e)
-    {
-        qDebug() << e.what();
-    }
-
-    return m_stocks;
-}
-
 gnss_sdr::MonitorPvt MainWindow::readMonitorPvt(char buff[], int bytes)
 {
     try
@@ -373,7 +360,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
         if (plotsConstellation_.find(index.row()) == plotsConstellation_.end())
         {
             QChart *chart = new QChart();  // has no parent!
-            chart->setTitle("Constellation CH " + QString::number(channel_id));
+            chart->setTitle("Channel " + QString::number(channel_id));
             chart->legend()->hide();
 
             QScatterSeries *series = new QScatterSeries(chart);

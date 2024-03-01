@@ -48,7 +48,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    gnss_sdr::Observables readGnssSynchro(char buff[], int bytes);
     gnss_sdr::MonitorPvt readMonitorPvt(char buff[], int bytes);
     void saveSettings();
     void loadSettings();
