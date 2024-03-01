@@ -61,31 +61,25 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
         try{
             int channel_id = channelsId_.at(index.row());
             gnss_sdr::GnssSynchro channel = channels_.at(channel_id);
+            // 通道所属的卫星系统：GPS/BDS/Galilean
+            QString channel_signal = channelsSignal_.at(channel_id);
 
-            QString channel_signal = m_channelsSignal.at(channel_id);
+            auto time_cbuf = channelsTime_.at(channel_id);
+            auto i_cbuf = channelsI_.at(channel_id);
+            auto q_cbuf = channelsQ_.at(channel_id);
+            auto cn0_cbuf = channelsCn0_.at(channel_id);
+            auto doppler_cbuf = channelsDoppler_.at(channel_id);
 
-            boost::circular_buffer<double> channel_time_cbuf =
-                m_channelsTime.at(channel_id);
-            boost::circular_buffer<double> channel_prompt_i_cbuf =
-                m_channelsPromptI.at(channel_id);
-            boost::circular_buffer<double> channel_prompt_q_cbuf =
-                m_channelsPromptQ.at(channel_id);
-            boost::circular_buffer<double> channel_cn0_cbuf =
-                m_channelsCn0.at(channel_id);
-            boost::circular_buffer<double> channel_doppler_cbuf =
-                m_channelsDoppler.at(channel_id);
-
-            QList<QVariant> channel_prompt_iq;
-            QList<QVariant> channel_cn0;
-            QList<QVariant> channel_doppler;
-
-            for (int i = 0; i < channel_cn0_cbuf.size(); i++)
+            // 为了下一步画图做准备
+            QList<QVariant> channel_prompt_iq,channel_cn0,channel_doppler;
+            // 将绘画点存入list中，方便绘图调用
+            for (int i = 0; i < cn0_cbuf.size(); i++)
             {
-                channel_prompt_iq << QPointF(channel_prompt_i_cbuf.at(i),
-                    channel_prompt_q_cbuf.at(i));
-                channel_cn0 << QPointF(channel_time_cbuf.at(i), channel_cn0_cbuf.at(i));
-                channel_doppler << QPointF(channel_time_cbuf.at(i),
-                    channel_doppler_cbuf.at(i));
+                channel_prompt_iq << QPointF(i_cbuf.at(i),
+                    q_cbuf.at(i));
+                channel_cn0 << QPointF(time_cbuf.at(i), cn0_cbuf.at(i));
+                channel_doppler << QPointF(time_cbuf.at(i),
+                    doppler_cbuf.at(i));
             }
 
             if (role == Qt::DisplayRole)
@@ -130,41 +124,17 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
             {
                 switch (index.column())
                 {
-                case 0:
-                    return QVariant::Invalid;
-
-                case 1:
-                    return QVariant::Invalid;
-
-                case 2:
-                    return QVariant::Invalid;
-
-                case 3:
-                    return QVariant::Invalid;
-
-                case 4:
-                    return QVariant::Invalid;
-
-                case 5:
-                    return QVariant::Invalid;
-
                 case 6:
-                    return channel_cn0_cbuf.back();
+                    return cn0_cbuf.back();
 
                 case 7:
-                    return channel_doppler_cbuf.back();
+                    return doppler_cbuf.back();
 
-                case 8:
-                    return QVariant::Invalid;
-
-                case 9:
-                    return QVariant::Invalid;
-
-                case 10:
+                default:
                     return QVariant::Invalid;
                 }
             }
-            else if (index.column() == 1 && role == Qt::DecorationRole)
+            else if (index.column() == 1)
             {
                 if (channel.system() == "G")
                 {
@@ -251,101 +221,82 @@ QVariant ChannelTableModel::headerData(int section,
  */
 void ChannelTableModel::populateChannels(const gnss_sdr::Observables *stocks)
 {
-    for (std::size_t i = 0; i < stocks->observable_size(); i++)
-    {
-        populateChannel(&stocks->observable(i));
+    for (int i = 0; i < stocks->observable_size(); i++){
+        auto obs = stocks->observable(i);
+        populateChannel(&obs);
     }
 }
 
 /*!
  Populates the internal data structures of the table model with the data of the \a ch GnssSynchro object.
+ 本函数仅处理一个通道的数据
  */
 void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
 {
     // Check if channel is valid, if not, do nothing.
     if (ch->fs() != 0)
     {
+        int id =  ch->channel_id();
         // Channel is valid, now check if it exists in the map of channels.
-        if (channels_.find(ch->channel_id()) != channels_.end())
+        if (channels_.find(id) != channels_.end())
         {
             // Channel exists, now check if its PRN is the same.
-            if (channels_.at(ch->channel_id()).prn() != ch->prn())
-            {
+            if (channels_.at(id).prn() != ch->prn()){
                 // PRN has changed so reset the channel.
-                clearChannel(ch->channel_id());
+                clearChannel(id);
             }
         }
 
         // Check the size of the map of GnssSynchro objects before adding new data.
         size_t map_size = channels_.size();
 
-        // Add the new GnssSynchro object to the map.
-        channels_[ch->channel_id()] = *ch;
+        // update/add the new GnssSynchro object to the local channel.
+        channels_[id] = *ch;
 
         // Time.
-        // Check if channel exists in the map of time data.
-        if (m_channelsTime.find(ch->channel_id()) == m_channelsTime.end())
-        {
+        if (channelsTime_.find(id) == channelsTime_.end()){
             // Channel does not exist so make room for it.
-            m_channelsTime[ch->channel_id()].resize(bufferSize_);
-            m_channelsTime[ch->channel_id()].clear();
+            channelsTime_[id].resize(bufferSize_);
+            channelsTime_[id].clear();
         }
-        // Populate map with new time data.
-        m_channelsTime[ch->channel_id()].push_back(ch->rx_time());
+        channelsTime_[id].push_back(ch->rx_time());
 
         // In-phase prompt component.
-        // Check if channel exists in the map of in-phase component data.
-        if (m_channelsPromptI.find(ch->channel_id()) == m_channelsPromptI.end())
-        {
-            // Channel does not exist so make room for it.
-            m_channelsPromptI[ch->channel_id()].resize(bufferSize_);
-            m_channelsPromptI[ch->channel_id()].clear();
+        if (channelsI_.find(id) == channelsI_.end()){
+            channelsI_[id].resize(bufferSize_);
+            channelsI_[id].clear();
         }
-        // Populate map with new in-phase component data.
-        m_channelsPromptI[ch->channel_id()].push_back(ch->prompt_i());
+        channelsI_[id].push_back(ch->prompt_i());
 
         // Quadrature prompt component.
-        // Check if channel exists in the map of quadrature component data.
-        if (m_channelsPromptQ.find(ch->channel_id()) == m_channelsPromptQ.end())
-        {
-            // Channel does not exist so make room for it.
-            m_channelsPromptQ[ch->channel_id()].resize(bufferSize_);
-            m_channelsPromptQ[ch->channel_id()].clear();
+        if (channelsQ_.find(id) == channelsQ_.end()){
+            channelsQ_[id].resize(bufferSize_);
+            channelsQ_[id].clear();
         }
-        // Populate map with new quadrature component data.
-        m_channelsPromptQ[ch->channel_id()].push_back(ch->prompt_q());
+        channelsQ_[id].push_back(ch->prompt_q());
 
         // CN0.
-        // Check if channel exists in the map of CN0 data.
-        if (m_channelsCn0.find(ch->channel_id()) == m_channelsCn0.end())
-        {
-            // Channel does not exist so make room for it.
-            m_channelsCn0[ch->channel_id()].resize(bufferSize_);
-            m_channelsCn0[ch->channel_id()].clear();
+        if (channelsCn0_.find(id) == channelsCn0_.end()){
+            channelsCn0_[id].resize(bufferSize_);
+            channelsCn0_[id].clear();
         }
-        // Populate map with new CN0 data.
-        m_channelsCn0[ch->channel_id()].push_back(ch->cn0_db_hz());
+        channelsCn0_[id].push_back(ch->cn0_db_hz());
 
         // Doppler.
-        // Check if channel exists in the map of Doppler data.
-        if (m_channelsDoppler.find(ch->channel_id()) == m_channelsDoppler.end())
-        {
-            // Channel does not exist so make room for it.
-            m_channelsDoppler[ch->channel_id()].resize(bufferSize_);
-            m_channelsDoppler[ch->channel_id()].clear();
+        if (channelsDoppler_.find(id) == channelsDoppler_.end()){
+            channelsDoppler_[id].resize(bufferSize_);
+            channelsDoppler_[id].clear();
         }
-        // Populate map with new Doppler data.
-        m_channelsDoppler[ch->channel_id()].push_back(ch->carrier_doppler_hz());
+        channelsDoppler_[id].push_back(ch->carrier_doppler_hz());
 
         // Signal name.
-        // Populate map with new signal name.
-        m_channelsSignal[ch->channel_id()] = getSignalPrettyName(ch);
+        channelsSignal_[id] = getSignalPrettyName(ch);
 
-        // Check the size of the map of GnssSynchro objects after adding new data.
-        if (channels_.size() != map_size)
-        {
-            // Map size has changed so record the new channel number in the vector of channel IDs.
-            channelsId_.push_back(ch->channel_id());
+        // check if new channel(s) is added to local channels
+        if (channels_.size() != map_size){
+            // Map size has changed
+            // so record the new channel number in the vector of channel IDs.
+            channelsId_.push_back(id);
         }
     }
 }
@@ -358,12 +309,12 @@ void ChannelTableModel::clearChannel(int ch_id)
     channelsId_.erase(std::remove(channelsId_.begin(), channelsId_.end(), ch_id),
         channelsId_.end());
     channels_.erase(ch_id);
-    m_channelsSignal.erase(ch_id);
-    m_channelsTime.erase(ch_id);
-    m_channelsPromptI.erase(ch_id);
-    m_channelsPromptQ.erase(ch_id);
-    m_channelsCn0.erase(ch_id);
-    m_channelsDoppler.erase(ch_id);
+    channelsSignal_.erase(ch_id);
+    channelsTime_.erase(ch_id);
+    channelsI_.erase(ch_id);
+    channelsQ_.erase(ch_id);
+    channelsCn0_.erase(ch_id);
+    channelsDoppler_.erase(ch_id);
 }
 
 /*!
@@ -373,12 +324,12 @@ void ChannelTableModel::clearChannels()
 {
     channelsId_.clear();
     channels_.clear();
-    m_channelsSignal.clear();
-    m_channelsTime.clear();
-    m_channelsPromptI.clear();
-    m_channelsPromptQ.clear();
-    m_channelsCn0.clear();
-    m_channelsDoppler.clear();
+    channelsSignal_.clear();
+    channelsTime_.clear();
+    channelsI_.clear();
+    channelsQ_.clear();
+    channelsCn0_.clear();
+    channelsDoppler_.clear();
 }
 
 /*!

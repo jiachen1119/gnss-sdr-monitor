@@ -73,12 +73,12 @@ protected:
 
     std::vector<int> channelsId_;
     std::map<int, gnss_sdr::GnssSynchro> channels_;
-    std::map<int, QString> m_channelsSignal;
-    std::map<int, boost::circular_buffer<double>> m_channelsTime;
-    std::map<int, boost::circular_buffer<double>> m_channelsPromptI;
-    std::map<int, boost::circular_buffer<double>> m_channelsPromptQ;
-    std::map<int, boost::circular_buffer<double>> m_channelsCn0;
-    std::map<int, boost::circular_buffer<double>> m_channelsDoppler;
+    std::map<int, QString> channelsSignal_;
+    std::map<int, boost::circular_buffer<double>> channelsTime_;
+    std::map<int, boost::circular_buffer<double>> channelsI_;
+    std::map<int, boost::circular_buffer<double>> channelsQ_;
+    std::map<int, boost::circular_buffer<double>> channelsCn0_;
+    std::map<int, boost::circular_buffer<double>> channelsDoppler_;
 
 private:
     std::map<std::string, QString> mapSignalName_;
