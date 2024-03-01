@@ -3,7 +3,10 @@
 #include <QList>
 #include <QtGui>
 
-#define DEFAULT_BUFFER_SIZE 1000
+// 这里的buffer size 主要根据接收机输出的跟踪数据频率来决定的
+// 输出频率默认为20ms，这里放大了五倍，也就是100ms输出一次
+// 如果size为1000，也就是绘图将会展示100s的数据
+#define DEFAULT_BUFFER_SIZE 600
 
 /*!
  Constructs an instance of a table model.
@@ -20,6 +23,10 @@ ChannelTableModel::ChannelTableModel()
 
     columns_ = 11;
     bufferSize_ = DEFAULT_BUFFER_SIZE;
+
+    checkTimer_.setInterval(2000);
+    connect(&checkTimer_,&QTimer::timeout,this,&ChannelTableModel::checkChannels);
+    checkTimer_.start();
 }
 
 /*!
@@ -404,4 +411,32 @@ void ChannelTableModel::setBufferSize()
 int ChannelTableModel::getChannelId(int row)
 {
     return channelsId_.at(row);
+}
+
+// 本函数实现了对失去跟踪锁定通道在显示界面的删除
+void ChannelTableModel::checkChannels()
+{
+    if (channelsTime_.empty()) return;
+    if (checkNum_.empty()){
+        for (const auto& i : channelsTime_){
+            checkNum_.insert(std::make_pair(i.first,i.second.back()));
+        }
+        return;
+    }
+    for (auto j : checkNum_){
+        if (channelsTime_.find(j.first)==channelsTime_.end()){
+            checkNum_.clear();
+            return;
+        }
+        else{
+            if (channelsTime_.find(j.first)->second.back()==j.second){
+                clearChannel(j.first);
+                break;
+            }
+        }
+    }
+    checkNum_.clear();
+    for (const auto& i : channelsTime_){
+        checkNum_.insert(std::make_pair(i.first,i.second.back()));
+    }
 }

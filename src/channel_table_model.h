@@ -37,6 +37,7 @@
 #include "gnss_synchro.pb.h"
 #include <boost/circular_buffer.hpp>
 #include <QAbstractTableModel>
+#include <QTimer>
 
 class ChannelTableModel : public QAbstractTableModel
 {
@@ -51,6 +52,10 @@ public:
     void populateChannel(const gnss_sdr::GnssSynchro *ch);
     void clearChannel(int ch_id);
     void clearChannels();
+
+    // 检查通道是否存在失锁退出的情况
+    void checkChannels();
+
     QString getSignalPrettyName(const gnss_sdr::GnssSynchro *ch);
     QList<QVariant> getListFromCbuf(boost::circular_buffer<double> cbuf);
     int getColumns();
@@ -70,6 +75,9 @@ protected:
     int columns_;
     int bufferSize_;
     gnss_sdr::Observables m_stocks;
+
+    QTimer checkTimer_;
+    std::map<int,double> checkNum_;
 
     std::vector<int> channelsId_;
     std::map<int, gnss_sdr::GnssSynchro> channels_;
