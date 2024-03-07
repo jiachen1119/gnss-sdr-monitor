@@ -144,21 +144,13 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
             else if (index.column() == 1)
             {
                 if (channel.system() == "G")
-                {
                     return QIcon(":/images/flag-us.png");
-                }
                 else if (channel.system() == "R")
-                {
                     return QIcon(":/images/flag-ru.png");
-                }
                 else if (channel.system() == "E")
-                {
                     return QIcon(":/images/flag-eu.png");
-                }
                 else if (channel.system() == "C")
-                {
                     return QIcon(":/images/flag-cn.png");
-                }
             }
         }
         catch (const std::exception &ex)
@@ -174,48 +166,42 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
     return QVariant::Invalid;
 }
 
-QVariant ChannelTableModel::headerData(int section,
-    Qt::Orientation orientation,
+///
+/// \param section 第几列
+/// \param orientation 标题朝向
+/// \param role 显示模式
+/// \return 返回表格第一行标题
+QVariant ChannelTableModel::headerData(int section,Qt::Orientation orientation,
     int role) const
 {
-    if (role == Qt::DisplayRole)
-    {
-        if (orientation == Qt::Horizontal)
-        {
+    if (role == Qt::DisplayRole){
+        if (orientation == Qt::Horizontal){
             switch (section)
             {
             case 0:
                 return "CH";
-
             case 1:
                 return "Signal";
-
             case 2:
                 return "PRN";
-
             case 3:
                 return "ACQ Doppler [Hz]";
-
             case 4:
                 return "ACQ Code Phase [samples]";
-
             case 5:
                 return "Constellation";
-
             case 6:
                 return "C/N0 [dB-Hz]";
-
             case 7:
                 return "Doppler [Hz]";
-
             case 8:
                 return "TOW [ms]";
-
             case 9:
                 return "TLM";
-
             case 10:
                 return "Pseudorange [m]";
+            default:
+                return QVariant::Invalid;
             }
         }
     }
@@ -347,46 +333,29 @@ void ChannelTableModel::clearChannels()
 QString ChannelTableModel::getSignalPrettyName(const gnss_sdr::GnssSynchro *ch)
 {
     QString system_name;
-
     if (!ch->system().empty())
     {
         if (ch->system() == "G")
-        {
             system_name = QStringLiteral("GPS");
-        }
         else if (ch->system() == "E")
-        {
             system_name = QStringLiteral("Galileo");
-        }
+        else if (ch->system() == "C")
+            system_name = QStringLiteral("BeiDou");
+        else if (ch->system() == "R")
+            system_name = QStringLiteral("Glonass");
+        else
+            system_name = QVariant::Invalid;
 
         if (mapSignalName_.find(ch->signal()) != mapSignalName_.end())
-        {
             system_name.append(" ").append(mapSignalName_.at(ch->signal()));
-        }
     }
-
     return system_name;
-}
-
-/*!
- Gets a list from a circular buffer \a cbuf.
- */
-QList<QVariant> ChannelTableModel::getListFromCbuf(boost::circular_buffer<double> cbuf)
-{
-    QList<QVariant> list;
-
-    for (size_t i = 0; i < cbuf.size(); i++)
-    {
-        list << cbuf.at(i);
-    }
-
-    return list;
 }
 
 /*!
  Gets the number of columns of the table model.
  */
-int ChannelTableModel::getColumns()
+int ChannelTableModel::getColumns() const
 {
     return columns_;
 }

@@ -162,6 +162,9 @@ void MainWindow::updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *serie
     QPointF p;
     QVector<QPointF> points;
 
+    double min_x = std::numeric_limits<double>::max();
+    double max_x = -std::numeric_limits<double>::max();
+
     double min_y = std::numeric_limits<double>::max();
     double max_y = -std::numeric_limits<double>::max();
 
@@ -171,11 +174,11 @@ void MainWindow::updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *serie
         p = i.toPointF();
         points << p;
 
+        min_x = std::min(min_x, p.x());
+        max_x = std::max(max_x, p.x());
         min_y = std::min(min_y, p.y());
         max_y = std::max(max_y, p.y());
     }
-    double min_x = points.front().x();
-    double max_x = points.back().x();
     series->replace(points);
 
     chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
@@ -206,7 +209,7 @@ void MainWindow::updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *se
         max_y = std::max(max_y, p.y());
     }
     chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
-    chart->axes(Qt::Vertical).back()->setRange(10, 55);
+    chart->axes(Qt::Vertical).back()->setRange(25, 50);
     series->replace(points);
 }
 
@@ -354,11 +357,11 @@ void MainWindow::expandPlot(const QModelIndex &index)
     {
         if (plotsConstellation_.find(index.row()) == plotsConstellation_.end())
         {
-            QChart *chart = new QChart();  // has no parent!
+            auto *chart = new QChart();  // has no parent!
             chart->setTitle("Channel " + QString::number(channel_id));
             chart->legend()->hide();
 
-            QScatterSeries *series = new QScatterSeries(chart);
+            auto *series = new QScatterSeries(chart);
             series->setMarkerSize(8);
             chart->addSeries(series);
             chart->createDefaultAxes();
@@ -368,7 +371,8 @@ void MainWindow::expandPlot(const QModelIndex &index)
             chart->setContentsMargins(-18, -18, -14, -16);
 
             chartView = new QChartView(chart);
-            chartView->setRenderHint(QPainter::Antialiasing);
+            // 抗锯齿
+            chartView->setRenderHint(QPainter::Antialiasing, true);
             chartView->setContentsMargins(0, 0, 0, 0);
 
             // Draw chart now.

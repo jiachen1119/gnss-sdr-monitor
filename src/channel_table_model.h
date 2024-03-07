@@ -39,6 +39,8 @@
 #include <QAbstractTableModel>
 #include <QTimer>
 
+typedef boost::circular_buffer<double> CBuff;
+
 class ChannelTableModel : public QAbstractTableModel
 {
 public:
@@ -57,8 +59,7 @@ public:
     void checkChannels();
 
     QString getSignalPrettyName(const gnss_sdr::GnssSynchro *ch);
-    QList<QVariant> getListFromCbuf(boost::circular_buffer<double> cbuf);
-    int getColumns();
+    int getColumns() const;
     void setBufferSize();
     int getChannelId(int row);
 
