@@ -25,58 +25,50 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    // 获取屏幕尺寸，为后续expandPlot做准备
     QScreen *screen=QGuiApplication::primaryScreen();
     QRect size=screen->availableGeometry();
     screenHeight_=size.height();
     screenWidth_=size.width();
 
-    // Use a timer to delay updating the model to a fixed amount of times per
-    // second.
+    // 表格更新计时器
     updateTimer_.setInterval(1000);
     updateTimer_.setSingleShot(true);
     connect(&updateTimer_, &QTimer::timeout, [this] { model_->update(); });
 
+    // UI设置
     ui->setupUi(this);
+
+    // tab widget 设置
+    ui->tabWidget->setTabPosition(QTabWidget::South);
+    ui->tabWidget->setDocumentMode(true);
 
     // Monitor_Pvt_Wrapper.
     monitorPvtWrapper_ = new MonitorPvtWrapper();
 
-    // Telecommand widget.
-    telecommandDockWidget_ = new QDockWidget("Telecommand", this);
-    telecommandWidget_ = new TelecommandWidget(telecommandDockWidget_);
-    telecommandDockWidget_->setWidget(telecommandWidget_);
-    telecommandDockWidget_->setMaximumWidth(this->size().width()/2);
-    addDockWidget(Qt::TopDockWidgetArea, telecommandDockWidget_);
+    // Telecommand widget
+    telecommandWidget_ = new TelecommandWidget(ui->telecomWidget);
+    ui->telecomWidget->setMaximumWidth(this->width()/2);
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
     // Map widget.
-    mapDockWidget_ = new QDockWidget("Map", this);
-    mapWidget_ = new QQuickWidget(this);
+    mapWidget_ = new QQuickWidget(ui->tabWidget);
+    ui->tabWidget->addTab(mapWidget_, QStringLiteral("Map"));
     mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
     mapWidget_->setSource(QUrl("qrc:/qml/main.qml"));
     mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mapDockWidget_->setWidget(mapWidget_);
-    addDockWidget(Qt::TopDockWidgetArea, mapDockWidget_);
-    mapDockWidget_->raise();
 
     // Altitude widget.
-    altitudeDockWidget_ = new QDockWidget("Altitude", this);
-    altitudeWidget_ = new AltitudeWidget(altitudeDockWidget_);
-    altitudeDockWidget_->setWidget(altitudeWidget_);
-    addDockWidget(Qt::TopDockWidgetArea, altitudeDockWidget_);
+    altitudeWidget_ = new AltitudeWidget(ui->tabWidget);
+    ui->tabWidget->addTab(altitudeWidget_, QStringLiteral("Altitude"));
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitudeWidget_, &AltitudeWidget::addData);
     connect(&updateTimer_, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
 
     // Dilution of precision widget.
-    DOPDockWidget_ = new QDockWidget("DOP", this);
-    DOPWidget_ = new DOPWidget(DOPDockWidget_);
-    DOPDockWidget_->setWidget(DOPWidget_);
-    addDockWidget(Qt::TopDockWidgetArea, DOPDockWidget_);
+    DOPWidget_ = new DOPWidget(ui->tabWidget);
+    ui->tabWidget->addTab(DOPWidget_, QStringLiteral("DOP"));
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
     connect(&updateTimer_, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
-
-    QMainWindow::tabifyDockWidget(DOPDockWidget_,altitudeDockWidget_);
-    QMainWindow::tabifyDockWidget(altitudeDockWidget_,mapDockWidget_);
 
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
@@ -95,10 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->mainToolBar->addSeparator();
     closePlotsAction_ = ui->mainToolBar->addAction("Close Plots");
     ui->mainToolBar->addSeparator();
-    ui->mainToolBar->addAction(telecommandDockWidget_->toggleViewAction());
-    ui->mainToolBar->addAction(mapDockWidget_->toggleViewAction());
-    ui->mainToolBar->addAction(altitudeDockWidget_->toggleViewAction());
-    ui->mainToolBar->addAction(DOPDockWidget_->toggleViewAction());
+
     start_->setEnabled(false);
     stop_->setEnabled(true);
     clear_->setEnabled(false);
@@ -545,9 +534,9 @@ void MainWindow::about()
 {
     const QString text =
         "<h3>gnss-sdr-monitor</h3>"
-        "A graphical user interface to monitor the GNSS-SDR status in real time."
-        "<p>Written by Álvaro Cebrián Juan and licensed under GNU GPLv3 license.</p>"
-        "<p>Report bugs and suggestions to acebrianjuan@gmail.com</p>";
+        "基于TCP-IP的GNSS SDR用户交互界面"
+        "<p>由东南大学Xinhua Tang团队，修改自 Álvaro Cebrián Juan.</p>"
+        "<p>bug和功能建议可以联系我们： kxn1119@gmail.com</p>";
 
     QMessageBox::about(this, "About gnss-sdr-monitor", text);
 }

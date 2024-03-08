@@ -69,18 +69,13 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    void updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
-    void updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
+    static void updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
+    static void updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
 
     Ui::MainWindow *ui;
 
     int screenWidth_;
     int screenHeight_;
-
-    QDockWidget *mapDockWidget_;
-    QDockWidget *telecommandDockWidget_;
-    QDockWidget *altitudeDockWidget_;
-    QDockWidget *DOPDockWidget_;
 
     QQuickWidget *mapWidget_;
     TelecommandWidget *telecommandWidget_;
