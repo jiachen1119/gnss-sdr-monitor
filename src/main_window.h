@@ -28,6 +28,7 @@
 #include <QXYSeries>
 #include <QtNetwork/QUdpSocket>
 #include "socket/SocketGnss.h"
+#include "styles/TabBarStyle.h"
 
 
 namespace Ui

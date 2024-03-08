@@ -56,6 +56,7 @@ set(SOURCES
     altitude_widget.cpp
     dop_widget.cpp
         socket/SocketGnss.cpp
+        styles/TabBarStyle.cpp
     ${PROTO_SRCS}
     ${PROTO_SRCS2}
 )

@@ -39,6 +39,15 @@ MainWindow::MainWindow(QWidget *parent)
     // UI设置
     ui->setupUi(this);
 
+    // 左侧侧边栏设置
+    ui->tabWidget_main->setTabPosition(QTabWidget::West);
+    ui->tabWidget_main->setDocumentMode(true);
+    ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle(Qt::Horizontal));
+
+    // dashboard widget 设置
+    ui->gridLayout_dashboard->setRowStretch(0,3);
+    ui->gridLayout_dashboard->setRowStretch(1,2);
+
     // tab widget 设置
     ui->tabWidget->setTabPosition(QTabWidget::South);
     ui->tabWidget->setDocumentMode(true);
