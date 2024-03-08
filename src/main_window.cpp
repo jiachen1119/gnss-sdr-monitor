@@ -361,8 +361,11 @@ void MainWindow::expandPlot(const QModelIndex &index)
             chart->setTitle("Channel " + QString::number(channel_id));
             chart->legend()->hide();
 
+            // 散点图
             auto *series = new QScatterSeries(chart);
+            // 设置点的大小
             series->setMarkerSize(8);
+
             chart->addSeries(series);
             chart->createDefaultAxes();
             chart->axes(Qt::Horizontal).back()->setTitleText("I prompt");

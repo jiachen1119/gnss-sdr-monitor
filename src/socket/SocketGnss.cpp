@@ -11,7 +11,7 @@ SocketGnss::SocketGnss(QObject *parent,quint16 port): QThread(parent)
 
 void SocketGnss::run()
 {
-    std::unique_ptr<QUdpSocket> socketGnssSynchro_ = std::make_unique<QUdpSocket>();
+    QSharedPointer<QUdpSocket> socketGnssSynchro_ = QSharedPointer<QUdpSocket>(new QUdpSocket());
     socketGnssSynchro_->abort();
     // 必须要加上延时环节
     QThread::msleep(500);

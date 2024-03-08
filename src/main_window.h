@@ -46,7 +46,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     gnss_sdr::MonitorPvt readMonitorPvt(char buff[], int bytes);
     void saveSettings();
