@@ -8,29 +8,18 @@
 
 #pragma once
 
+#include <QPainter>
 #include <QProxyStyle>
+#include <QStyleOptionTab>
 
 class TabBarStyle : public QProxyStyle
 {
-    Q_OBJECT
-
 public:
-    explicit TabBarStyle(Qt::Orientation orientation = Qt::Vertical);
-    ~TabBarStyle() override;
+    QSize sizeFromContents(ContentsType type, const QStyleOption *option,
+        const QSize &size, const QWidget *widget) const override;
 
-    void drawControl(QStyle::ControlElement element, const QStyleOption *option,
-        QPainter *painter, const QWidget *widget = nullptr) const override;
-
-    void drawItemText(QPainter *painter, const QRect &rect, int flags, const QPalette &pal,
-        bool enabled, const QString &text, QPalette::ColorRole textRole = QPalette::NoRole) const override;
-
-    // 控制CE_TabBarTabLabel的尺寸
-    QSize sizeFromContents(QStyle::ContentsType type, const QStyleOption *option,
-        const QSize &contentsSize, const QWidget *widget = nullptr) const override;
-
-private:
-    Qt::Orientation orientation_;	// 文本方向
+    void drawControl(ControlElement element, const QStyleOption *option,
+        QPainter *painter, const QWidget *widget) const override;
 };
-
 
 #endif  // GNSS_SDR_MONITOR_TABBARSTYLE_H

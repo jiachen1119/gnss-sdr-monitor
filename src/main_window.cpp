@@ -42,10 +42,10 @@ MainWindow::MainWindow(QWidget *parent)
     // 左侧侧边栏设置
     ui->tabWidget_main->setTabPosition(QTabWidget::West);
     ui->tabWidget_main->setDocumentMode(true);
-    ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle(Qt::Horizontal));
+    ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
 
     // dashboard widget 设置
-    ui->gridLayout_dashboard->setRowStretch(0,3);
+    ui->gridLayout_dashboard->setRowStretch(0,4);
     ui->gridLayout_dashboard->setRowStretch(1,2);
 
     // tab widget 设置
@@ -56,8 +56,11 @@ MainWindow::MainWindow(QWidget *parent)
     monitorPvtWrapper_ = new MonitorPvtWrapper();
 
     // Telecommand widget
+    auto *layout = new QVBoxLayout(ui->telecomWidget);
     telecommandWidget_ = new TelecommandWidget(ui->telecomWidget);
+    layout->addWidget(telecommandWidget_);
     ui->telecomWidget->setMaximumWidth(this->width()/2);
+    ui->telecomWidget->setMaximumHeight(this->height()/2);
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
     // Map widget.
