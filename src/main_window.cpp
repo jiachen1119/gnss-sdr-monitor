@@ -38,11 +38,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // UI设置
     ui->setupUi(this);
+    this->setWindowTitle(QStringLiteral("GNSS SDR 上位机 designed by SEU Tang"));
 
     // 左侧侧边栏设置
     ui->tabWidget_main->setTabPosition(QTabWidget::West);
     ui->tabWidget_main->setDocumentMode(true);
     ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
+    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_Hover, true);
+//    ui->tabWidget_main->tabBar()->setMouseTracking(true);
 
     // dashboard widget 设置
     ui->gridLayout_dashboard->setRowStretch(0,4);
