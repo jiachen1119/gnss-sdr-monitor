@@ -25,6 +25,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+//    this->setStyleSheet("background-color: #111111;");
+
     // 获取屏幕尺寸，为后续expandPlot做准备
     QScreen *screen=QGuiApplication::primaryScreen();
     QRect size=screen->availableGeometry();
@@ -45,10 +47,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tabWidget_main->setDocumentMode(true);
     ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
 
+//    QPalette palette;
+//    palette.setColor(QPalette::Window, QColor("414141")); // 设置背景色为蓝色
+//    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）为白色
+//    ui->tabWidget_main->setPalette(palette);
+
+
     // 只有开启WA_Hover才可以探查到是否有鼠标悬浮
     ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_Hover, true);
     ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_StyledBackground, true);
-    ui->tabWidget_main->tabBar()->setStyleSheet("background-color: #111111;");
+    ui->tabWidget_main->tabBar()->setStyleSheet("background-color: #414141;");
     ui->tabWidget_main->tabBar()->setContentsMargins(0,0,0,0);
 
     ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
