@@ -7,6 +7,8 @@
         <file>images/flag-ru.png</file>
         <file>images/flag-us.png</file>
         <file>images/dashboard.svg</file>
+        <file>images/dashboard2.svg</file>
         <file>images/about.svg</file>
+        <file>images/about2.svg</file>
     </qresource>
 </RCC>

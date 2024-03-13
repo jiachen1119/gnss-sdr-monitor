@@ -44,26 +44,39 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tabWidget_main->setTabPosition(QTabWidget::West);
     ui->tabWidget_main->setDocumentMode(true);
     ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
+
     // 只有开启WA_Hover才可以探查到是否有鼠标悬浮
     ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_Hover, true);
+    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_StyledBackground, true);
+    ui->tabWidget_main->tabBar()->setStyleSheet("background-color: #111111;");
+    ui->tabWidget_main->tabBar()->setContentsMargins(0,0,0,0);
 
-    ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
+    ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
     ui->tabWidget_main->tabBar()->setTabText(0, QStringLiteral("Dash Board"));
 
-    ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about.svg"));
+    ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about2.svg"));
     ui->tabWidget_main->tabBar()->setTabText(1, QStringLiteral("About"));
 
     connect(ui->tabWidget_main,&QTabWidget::currentChanged, this,
         [=](int index){
-            if (index == 0)
-                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
-            else
+            if (index == 0){
                 ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about2.svg"));
+            }
+            else if (index == 1){
+                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
+            }
+            else{
+                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about2.svg"));
+            }
         });
 
     // dashboard widget 设置
     ui->gridLayout_dashboard->setRowStretch(0,4);
     ui->gridLayout_dashboard->setRowStretch(1,2);
+    ui->gridLayout_dashboard->setContentsMargins(0,0,0,0);
 
     // tab widget 设置
     ui->tabWidget->setTabPosition(QTabWidget::South);

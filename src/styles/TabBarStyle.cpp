@@ -6,7 +6,7 @@ QSize TabBarStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
     QSize s = QProxyStyle::sizeFromContents(type, option, size, widget);
     if (type == QStyle::CT_TabBarTab) {
         s.transpose();
-        s.rwidth() = 70; // 设置每个tabBar中item的大小 rwidth是可以修改的
+        s.rwidth() = 80; // 设置每个tabBar中item的大小 rwidth是可以修改的
         s.rheight() = 70 + 8 + 5;
     }
     return s;
@@ -19,12 +19,20 @@ void TabBarStyle::drawControl(ControlElement element, const QStyleOption *option
             // 获取这个tabbar的矩形区域范围
             QRect all_rect = tab->rect;
 
+            // 字体
+            QTextOption text_option;
+            text_option.setAlignment(Qt::AlignHCenter|Qt::AlignBottom);
+
             // 选中状态 使用位运算的原因是 可能状态有多个，只要存在被选中就可以了
             if (tab->state & QStyle::State_Selected) {
                 // 保存之前的状态 以便使用restore恢复
                 painter->setPen(0xffffff);
                 painter->setBrush(QBrush(0xffffff));
                 painter->drawRect(all_rect.adjusted(0, 0, 0, 0));
+
+                painter->setFont(QFont("", 10, QFont::Bold));
+                painter->setPen(0x720320);
+                painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
             }
 
             //hover状态 鼠标移动状态
@@ -33,23 +41,23 @@ void TabBarStyle::drawControl(ControlElement element, const QStyleOption *option
                 painter->setBrush(current_color);
                 painter->setPen(Qt::transparent);
                 painter->drawRect(all_rect.adjusted(0, 0, 0, 0));
+
+                painter->setFont(QFont("", 10, QFont::Bold));
+                painter->setPen(0xFFFFFF);
+                painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
             }
 
             else {
-                painter->setPen(0x33CCFF);
+                painter->setFont(QFont("", 8, QFont::Bold));
+                painter->setPen(0xFFFFFF);
+                painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
             }
 
             // icon
             auto icon = tab->icon;
-            QRect icon_rect = all_rect.adjusted(15,15,-15,-28);
+            QRect icon_rect = all_rect.adjusted(20,15,-20,-28);
             painter->drawPixmap(icon_rect,icon.pixmap(QSize(500,500)));
 
-            // 字体
-            QTextOption option;
-            option.setAlignment(Qt::AlignHCenter|Qt::AlignBottom);
-            painter->setFont(QFont("楷体", 8, QFont::Bold));
-            painter->setPen(0x0A0A0A);
-            painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, option);
             return;
         }
     }
