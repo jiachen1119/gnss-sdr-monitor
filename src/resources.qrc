@@ -6,5 +6,7 @@
         <file>images/flag-eu.png</file>
         <file>images/flag-ru.png</file>
         <file>images/flag-us.png</file>
+        <file>images/dashboard.svg</file>
+        <file>images/about.svg</file>
     </qresource>
 </RCC>
