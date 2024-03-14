@@ -72,6 +72,7 @@ protected:
 private:
     static void updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
     static void updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index);
+    void  tabBarSetting();
 
     Ui::MainWindow *ui;
 

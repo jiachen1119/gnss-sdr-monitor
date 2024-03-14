@@ -42,44 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setWindowTitle(QStringLiteral("GNSS SDR 上位机 designed by SEU Tang"));
 
-    // 左侧侧边栏设置
-    ui->tabWidget_main->setTabPosition(QTabWidget::West);
-    ui->tabWidget_main->setDocumentMode(true);
-    ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
+    // Tab Bar设置
+    tabBarSetting();
 
-//    QPalette palette;
-//    palette.setColor(QPalette::Window, QColor("414141")); // 设置背景色为蓝色
-//    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）为白色
-//    ui->tabWidget_main->setPalette(palette);
-
-
-    // 只有开启WA_Hover才可以探查到是否有鼠标悬浮
-    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_Hover, true);
-    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_StyledBackground, true);
-    ui->tabWidget_main->tabBar()->setStyleSheet("background-color: #414141;");
-    ui->tabWidget_main->tabBar()->setContentsMargins(0,0,0,0);
-
-    ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(0, QStringLiteral("Dash Board"));
-
-    ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(1, QStringLiteral("About"));
-
-    connect(ui->tabWidget_main,&QTabWidget::currentChanged, this,
-        [=](int index){
-            if (index == 0){
-                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about2.svg"));
-            }
-            else if (index == 1){
-                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
-            }
-            else{
-                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/about2.svg"));
-            }
-        });
+    //    QPalette palette;
+    //    palette.setColor(QPalette::Window,Qt::black); // 设置背景色
+    //    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）
+    //    ui->tabWidget_main->setPalette(palette);
 
     // dashboard widget 设置
     ui->gridLayout_dashboard->setRowStretch(0,4);
@@ -589,4 +558,68 @@ void MainWindow::about()
         "<p>bug和功能建议可以联系我们： kxn1119@gmail.com</p>";
 
     QMessageBox::about(this, "About gnss-sdr-monitor", text);
+}
+void MainWindow::tabBarSetting()
+{
+    // 左侧侧边栏设置
+    ui->tabWidget_main->setTabPosition(QTabWidget::West);
+    ui->tabWidget_main->setDocumentMode(true);
+
+    // 自定义qstyle
+    ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
+
+    // 设置起始页
+    ui->tabWidget_main->setCurrentIndex(0);
+
+    // 只有开启WA_Hover才可以探查到是否有鼠标悬浮
+    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_Hover, true);
+    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_StyledBackground, true);
+
+    // 设置背景色和边界距离
+    ui->tabWidget_main->tabBar()->setStyleSheet("background-color: #414141;");
+    ui->tabWidget_main->widget(0)->setStyleSheet("background-color: #ececec;");
+    ui->tabWidget_main->tabBar()->setContentsMargins(0,0,0,0);
+
+    // 设置Icon
+    ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(0, QStringLiteral("Dashboard"));
+
+    ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map2.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(1, QStringLiteral("Solution"));
+
+    ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/settings2.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(2, QStringLiteral("Settings"));
+
+    ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/about2.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(3, QStringLiteral("About"));
+
+    // 设置Icon切换
+    connect(ui->tabWidget_main,&QTabWidget::currentChanged, this,
+        [=](int index){
+            if (index == 0){
+                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/about2.svg"));
+            }
+            else if (index == 1){
+                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/about2.svg"));
+            }
+            else if (index == 2)
+            {
+                ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/settings.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/about2.svg"));
+            }
+            else{
+                ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/about.svg"));
+            }
+        });
 }

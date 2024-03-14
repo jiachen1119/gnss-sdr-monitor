@@ -8,7 +8,11 @@
         <file>images/flag-us.png</file>
         <file>images/dashboard.svg</file>
         <file>images/dashboard2.svg</file>
+        <file>images/map.svg</file>
+        <file>images/map2.svg</file>
         <file>images/about.svg</file>
         <file>images/about2.svg</file>
+        <file>images/settings.svg</file>
+        <file>images/settings2.svg</file>
     </qresource>
 </RCC>
