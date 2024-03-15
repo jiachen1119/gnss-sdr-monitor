@@ -80,6 +80,8 @@ private:
     int screenHeight_;
 
     QQuickWidget *mapWidget_;
+
+
     TelecommandWidget *telecommandWidget_;
     AltitudeWidget *altitudeWidget_;
     DOPWidget *DOPWidget_;

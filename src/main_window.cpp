@@ -70,13 +70,24 @@ MainWindow::MainWindow(QWidget *parent)
     ui->telecomWidget->setMaximumHeight(this->height()/2);
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
+    // map tab setting
+    auto layout_map = new QHBoxLayout(ui->tab_2);
+    ui->tab_2->setLayout(layout_map);
+
+    // list widget.
+    auto solution_list = new QListView(ui->tab_2);
+    layout_map->addWidget(solution_list);
+
     // Map widget.
-    mapWidget_ = new QQuickWidget(ui->tabWidget);
-    ui->tabWidget->addTab(mapWidget_, QStringLiteral("Map"));
+    mapWidget_ = new QQuickWidget(ui->tab_2);
+    layout_map->addWidget(mapWidget_);
     mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
     mapWidget_->setSource(QUrl("qrc:/qml/main.qml"));
     mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
+    layout_map->setStretch(0,1);
+    layout_map->setStretch(1,3);
+    
     // Altitude widget.
     altitudeWidget_ = new AltitudeWidget(ui->tabWidget);
     ui->tabWidget->addTab(altitudeWidget_, QStringLiteral("Altitude"));

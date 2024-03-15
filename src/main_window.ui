@@ -67,14 +67,6 @@
        <attribute name="title">
         <string>Tab 2</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
-        <item>
-         <widget class="QListView" name="listView"/>
-        </item>
-        <item>
-         <widget class="QWidget" name="widget" native="true"/>
-        </item>
-       </layout>
       </widget>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
