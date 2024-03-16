@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     screenWidth_=size.width();
 
     // 表格更新计时器
-    updateTimer_.setInterval(1000);
+    updateTimer_.setInterval(500);
     updateTimer_.setSingleShot(true);
     connect(&updateTimer_, &QTimer::timeout, [this] { model_->update(); });
 
@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
     monitorPvtWrapper_ = new MonitorPvtWrapper();
 
     // Telecommand widget
-    auto *layout = new QVBoxLayout(ui->telecomWidget);
+    auto layout = new QVBoxLayout(ui->telecomWidget);
     telecommandWidget_ = new TelecommandWidget(ui->telecomWidget);
     layout->addWidget(telecommandWidget_);
     ui->telecomWidget->setMaximumWidth(this->width()/2);
@@ -346,7 +346,7 @@ void MainWindow::loadSettings()
 
 void MainWindow::showPreferences()
 {
-    PreferencesDialog *preferences = new PreferencesDialog(this);
+    auto *preferences = new PreferencesDialog(this);
     connect(preferences, &PreferencesDialog::accepted, model_,
         &ChannelTableModel::setBufferSize);
     connect(preferences, &PreferencesDialog::accepted, this,
@@ -408,7 +408,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsConstellation_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
+            connect(&updateTimer_, &QTimer::timeout, chart, [ chart, series, index]() {
                 updateChart(chart, series, index);
             });
 
@@ -423,11 +423,11 @@ void MainWindow::expandPlot(const QModelIndex &index)
     {
         if (plotsCn0_.find(index.row()) == plotsCn0_.end())
         {
-            QChart *chart = new QChart();  // has no parent!
+            auto *chart = new QChart();  // has no parent!
             chart->setTitle("CN0 CH " + QString::number(channel_id));
             chart->legend()->hide();
 
-            QLineSeries *series = new QLineSeries(chart);
+            auto *series = new QLineSeries(chart);
             chart->addSeries(series);
             chart->createDefaultAxes();
             chart->axes(Qt::Horizontal).back()->setTitleText("TOW [s]");
@@ -451,7 +451,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsCn0_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
+            connect(&updateTimer_, &QTimer::timeout, chart, [ chart, series, index]() {
                 updateCnoChart(chart, series, index);
             });
 
@@ -466,11 +466,11 @@ void MainWindow::expandPlot(const QModelIndex &index)
     {
         if (plotsDoppler_.find(index.row()) == plotsDoppler_.end())
         {
-            QChart *chart = new QChart();  // has no parent!
+            auto *chart = new QChart();  // has no parent!
             chart->setTitle("Doppler CH " + QString::number(channel_id));
             chart->legend()->hide();
 
-            QLineSeries *series = new QLineSeries(chart);
+            auto *series = new QLineSeries(chart);
             chart->addSeries(series);
             chart->createDefaultAxes();
             chart->axes(Qt::Horizontal).back()->setTitleText("TOW [s]");
@@ -493,7 +493,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsDoppler_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, chart, [this, chart, series, index]() {
+            connect(&updateTimer_, &QTimer::timeout, chart, [ chart, series, index]() {
                 updateChart(chart, series, index);
             });
 

@@ -24,7 +24,7 @@ ChannelTableModel::ChannelTableModel()
     columns_ = 11;
     bufferSize_ = DEFAULT_BUFFER_SIZE;
 
-    checkTimer_.setInterval(2000);
+    checkTimer_.setInterval(500);
     connect(&checkTimer_,&QTimer::timeout,this,&ChannelTableModel::checkChannels);
     checkTimer_.start();
 }

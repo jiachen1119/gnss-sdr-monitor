@@ -14,7 +14,8 @@ Rectangle {
         anchors.fill: parent
         plugin: myPlugin;
         center: QtPositioning.coordinate(32.0584359, 118.7888270)
-        zoomLevel: 19
+        zoomLevel: 18
+        copyrightsVisible: false
 
         Plugin {
             id: myPlugin
@@ -23,6 +24,11 @@ Rectangle {
                 name: "mapboxgl.access_token"
                 value: "pk.eyJ1IjoiamlhY2hlbjExMTkiLCJhIjoiY2x0NDJsamd5MWJsaTJqcXgwcnluMHZtaSJ9.bouv2PXrlGugcA-zTuWoXw"
             }
+            PluginParameter{
+                name: "useFBO"
+                value: false
+            }
+
         }
 
         ColumnLayout
