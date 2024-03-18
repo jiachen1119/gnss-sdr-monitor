@@ -228,7 +228,7 @@ void MainWindow::updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *se
         max_y = std::max(max_y, p.y());
     }
     chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
-    chart->axes(Qt::Vertical).back()->setRange(25, 50);
+    chart->axes(Qt::Vertical).back()->setRange(25, 53);
     series->replace(points);
 }
 

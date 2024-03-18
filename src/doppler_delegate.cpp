@@ -86,7 +86,7 @@ void DopplerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
     int contentHeight = option.fontMetrics.height();
 
     int usableContentWidth = contentWidth - cGap;
-    int textWidth = option.fontMetrics.width("-00000.0");
+    int textWidth = option.fontMetrics.horizontalAdvance("-00000.0");
     int sparklineWidth = usableContentWidth - textWidth;
 
     // Offset for translating the origin of the painting coordinate system to the top left corner of the cell.

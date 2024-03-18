@@ -24,11 +24,6 @@ Rectangle {
                 name: "mapboxgl.access_token"
                 value: "pk.eyJ1IjoiamlhY2hlbjExMTkiLCJhIjoiY2x0NDJsamd5MWJsaTJqcXgwcnluMHZtaSJ9.bouv2PXrlGugcA-zTuWoXw"
             }
-            PluginParameter{
-                name: "useFBO"
-                value: false
-            }
-
         }
 
         ColumnLayout
