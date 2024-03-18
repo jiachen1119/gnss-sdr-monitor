@@ -1,4 +1,4 @@
-#include "channel_table_model.h"
+#include "ChannelTableModel.h"
 #include <QDebug>
 #include <QList>
 #include <QtGui>
@@ -63,7 +63,7 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
         try{
             int channel_id = channelsId_.at(index.row());
             gnss_sdr::GnssSynchro channel = channels_.at(channel_id);
-            // 通道所属的卫星系统：GPS/BDS/Galilean
+            // 通道所属的卫星系统：GPS/BDS/Galileo
             QString channel_signal = channelsSignal_.at(channel_id);
 
             auto time_cbuf = channelsTime_.at(channel_id);
@@ -119,7 +119,7 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
                     return channel.flag_valid_word();
 
                 case 10:
-                    return channel.pseudorange_m();
+                    return QString::number(channel.pseudorange_m(),'f',3);
                 }
             }
             else if (role == Qt::ToolTipRole)

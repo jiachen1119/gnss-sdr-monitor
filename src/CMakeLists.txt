@@ -42,7 +42,7 @@ set(QT5_LIBRARIES
 set(TARGET ${CMAKE_PROJECT_NAME})
 
 set(SOURCES
-    channel_table_model.cpp
+        ChannelTableModel.cpp
     cn0_delegate.cpp
     constellation_delegate.cpp
     doppler_delegate.cpp
@@ -58,6 +58,8 @@ set(SOURCES
         socket/SocketGnss.cpp
         styles/TabBarStyle.cpp
         lib/Variance.h
+        lib/PVTStruct.h
+        PVT/PVTTableModel.cpp
     ${PROTO_SRCS}
     ${PROTO_SRCS2}
 )

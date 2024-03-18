@@ -36,7 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     // 表格更新计时器
     updateTimer_.setInterval(500);
     updateTimer_.setSingleShot(true);
-    connect(&updateTimer_, &QTimer::timeout, [this] { model_->update(); });
+    connect(&updateTimer_, &QTimer::timeout, [this] { channelTableModel_->update(); });
+    connect(&updateTimer_, &QTimer::timeout, [this] { pvtTableModel_->update(); });
 
     // UI设置
     ui->setupUi(this);
@@ -74,9 +75,13 @@ MainWindow::MainWindow(QWidget *parent)
     auto layout_map = new QHBoxLayout(ui->tab_2);
     ui->tab_2->setLayout(layout_map);
 
-    // list widget.
-    auto solution_list = new QListView(ui->tab_2);
-    layout_map->addWidget(solution_list);
+    // PVT widget.
+    auto solution_table = new QTableView(ui->tab_2);
+    solution_table->horizontalHeader()->hide();
+    solution_table->resizeColumnsToContents();
+    pvtTableModel_ = new PVTTableModel(solution_table);
+    solution_table->setModel(pvtTableModel_);
+    layout_map->addWidget(solution_table);
 
     // Map widget.
     mapWidget_ = new QQuickWidget(ui->tab_2);
@@ -127,11 +132,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(closePlotsAction_, &QAction::triggered, this, &MainWindow::closePlots);
 
     // Model.
-    model_ = new ChannelTableModel();
+    channelTableModel_ = new ChannelTableModel();
 
     // QTableView.
     // Tie the model to the view.
-    ui->tableView->setModel(model_);
+    ui->tableView->setModel(channelTableModel_);
     ui->tableView->setShowGrid(false);
     ui->tableView->verticalHeader()->hide();
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
@@ -156,6 +161,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(socketMonitorPvt_, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
     connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
+
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
     connect(ui->tableView, &QTableView::doubleClicked, this, &MainWindow::expandPlot);
 
@@ -252,7 +258,7 @@ void MainWindow::receiveGnssSynchro(gnss_sdr::Observables stocks)
     stocks_ =std::move(stocks);
     if (stop_->isEnabled())
     {
-        model_->populateChannels(&stocks_);
+        channelTableModel_->populateChannels(&stocks_);
         clear_->setEnabled(true);
     }
     if (!updateTimer_.isActive())
@@ -266,12 +272,12 @@ void MainWindow::receiveMonitorPvt()
     while (socketMonitorPvt_->hasPendingDatagrams())
     {
         QNetworkDatagram datagram = socketMonitorPvt_->receiveDatagram();
-        m_monitorPvt =
-            readMonitorPvt(datagram.data().data(), datagram.data().size());
+        monitorPvt_ = readMonitorPvt(datagram.data().data(), datagram.data().size());
 
         if (stop_->isEnabled())
         {
-            monitorPvtWrapper_->addMonitorPvt(m_monitorPvt);
+            monitorPvtWrapper_->addMonitorPvt(monitorPvt_);
+            pvtTableModel_->updatePVT(monitorPvt_);
             // clear->setEnabled(true);
         }
     }
@@ -279,8 +285,8 @@ void MainWindow::receiveMonitorPvt()
 
 void MainWindow::clearEntries()
 {
-    model_->clearChannels();
-    model_->update();
+    channelTableModel_->clearChannels();
+    channelTableModel_->update();
 
     altitudeWidget_->clear();
     DOPWidget_->clear();
@@ -295,14 +301,14 @@ gnss_sdr::MonitorPvt MainWindow::readMonitorPvt(char buff[], int bytes)
     try
     {
         std::string data(buff, bytes);
-        m_monitorPvt.ParseFromString(data);
+        monitorPvt_.ParseFromString(data);
     }
     catch (std::exception &e)
     {
         qDebug() << e.what();
     }
 
-    return m_monitorPvt;
+    return monitorPvt_;
 }
 
 void MainWindow::saveSettings()
@@ -315,7 +321,7 @@ void MainWindow::saveSettings()
 
     settings_.beginGroup("tableView");
     settings_.beginWriteArray("column");
-    for (int i = 0; i < model_->getColumns(); i++)
+    for (int i = 0; i < channelTableModel_->getColumns(); i++)
     {
         settings_.setArrayIndex(i);
         settings_.setValue("width", ui->tableView->columnWidth(i));
@@ -333,7 +339,7 @@ void MainWindow::loadSettings()
 
     settings_.beginGroup("tableView");
     settings_.beginReadArray("column");
-    for (int i = 0; i < model_->getColumns(); i++)
+    for (int i = 0; i < channelTableModel_->getColumns(); i++)
     {
         settings_.setArrayIndex(i);
         ui->tableView->setColumnWidth(i, settings_.value("width", 100).toInt());
@@ -347,7 +353,7 @@ void MainWindow::loadSettings()
 void MainWindow::showPreferences()
 {
     auto *preferences = new PreferencesDialog(this);
-    connect(preferences, &PreferencesDialog::accepted, model_,
+    connect(preferences, &PreferencesDialog::accepted, channelTableModel_,
         &ChannelTableModel::setBufferSize);
     connect(preferences, &PreferencesDialog::accepted, this,
         &MainWindow::setPort);
@@ -368,7 +374,7 @@ void MainWindow::setPort()
 
 void MainWindow::expandPlot(const QModelIndex &index)
 {
-    int channel_id = model_->getChannelId(index.row());
+    int channel_id = channelTableModel_->getChannelId(index.row());
 
     QChartView *chartView = nullptr;
 

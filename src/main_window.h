@@ -11,12 +11,15 @@
 #ifndef GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 #define GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 
+#include "ChannelTableModel.h"
+#include "PVT/PVTTableModel.h"
 #include "altitude_widget.h"
-#include "channel_table_model.h"
 #include "dop_widget.h"
 #include "gnss_synchro.pb.h"
 #include "monitor_pvt.pb.h"
 #include "monitor_pvt_wrapper.h"
+#include "socket/SocketGnss.h"
+#include "styles/TabBarStyle.h"
 #include "telecommand_widget.h"
 #include <QAbstractTableModel>
 #include <QChart>
@@ -27,8 +30,6 @@
 #include <QTimer>
 #include <QXYSeries>
 #include <QtNetwork/QUdpSocket>
-#include "socket/SocketGnss.h"
-#include "styles/TabBarStyle.h"
 
 
 namespace Ui
@@ -86,13 +87,14 @@ private:
     AltitudeWidget *altitudeWidget_;
     DOPWidget *DOPWidget_;
 
-    ChannelTableModel *model_;
+    ChannelTableModel *channelTableModel_;
+    PVTTableModel *pvtTableModel_;
 
     std::unique_ptr<SocketGnss> socketGnssSynchro_;
     QUdpSocket *socketMonitorPvt_;
     gnss_sdr::Observables stocks_;
     MonitorPvtWrapper *monitorPvtWrapper_;
-    gnss_sdr::MonitorPvt m_monitorPvt;
+    gnss_sdr::MonitorPvt monitorPvt_;
     std::vector<int> m_channels;
     quint16 m_portGnssSynchro;
     quint16 m_portMonitorPvt;
