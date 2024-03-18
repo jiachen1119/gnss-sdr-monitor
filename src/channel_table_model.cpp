@@ -3,11 +3,6 @@
 #include <QList>
 #include <QtGui>
 
-// 这里的buffer size 主要根据接收机输出的跟踪数据频率来决定的
-// 输出频率默认为20ms，这里放大了五倍，也就是100ms输出一次
-// 如果size为1000，也就是绘图将会展示100s的数据
-#define DEFAULT_BUFFER_SIZE 600
-
 /*!
  Constructs an instance of a table model.
  */
@@ -22,7 +17,7 @@ ChannelTableModel::ChannelTableModel()
     mapSignalName_["L5"] = "L5";
 
     columns_ = 11;
-    bufferSize_ = DEFAULT_BUFFER_SIZE;
+    bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
 
     checkTimer_.setInterval(500);
     connect(&checkTimer_,&QTimer::timeout,this,&ChannelTableModel::checkChannels);
@@ -367,7 +362,7 @@ void ChannelTableModel::setBufferSize()
 {
     QSettings settings;
     settings.beginGroup("Preferences_Dialog");
-    int size = settings.value("buffer_size", DEFAULT_BUFFER_SIZE).toInt();
+    int size = settings.value("buffer_size", BUFFER_SIZE_FOR_CHANNEL).toInt();
     settings.endGroup();
 
     bufferSize_ = size;

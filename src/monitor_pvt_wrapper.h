@@ -13,6 +13,7 @@
 #include <boost/circular_buffer.hpp>
 #include <QObject>
 #include <QVariant>
+#include "lib/Variance.h"
 
 class MonitorPvtWrapper : public QObject
 {
@@ -45,9 +46,9 @@ public slots:
     void setBufferSize(size_t size);
 
 private:
-    size_t m_bufferSize;
-    boost::circular_buffer<gnss_sdr::MonitorPvt> m_bufferMonitorPvt;
-    boost::circular_buffer<Coordinates> m_path;
+    size_t bufferSize_;
+    boost::circular_buffer<gnss_sdr::MonitorPvt> bufferMonitorPvt_;
+    boost::circular_buffer<Coordinates> path_;
 };
 
 #endif  // GNSS_SDR_MONITOR_MONITOR_PVT_WRAPPER_H_

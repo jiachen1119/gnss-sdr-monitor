@@ -2,34 +2,7 @@
  * \file altitude_widget.cpp
  * \brief Implementation of a widget that shows the altitude in a chart as
  * reported by the receiver.
- *
- * \author Álvaro Cebrián Juan, 2019. acebrianjuan(at)gmail.com
- *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
  */
-
 
 #include "altitude_widget.h"
 #include <QChart>
@@ -42,21 +15,21 @@
 AltitudeWidget::AltitudeWidget(QWidget *parent) : QWidget(parent)
 {
     // Default buffer size.
-    m_bufferSize = 100;
+    bufferSize_ = BUFFER_SIZE_FOR_PVT;
 
-    m_altitudeBuffer.resize(m_bufferSize);
-    m_altitudeBuffer.clear();
+    altitudeBuffer_.resize(bufferSize_);
+    altitudeBuffer_.clear();
 
-    m_series = new QtCharts::QLineSeries();
-    m_chartView = new QtCharts::QChartView(this);
+    series_ = new QtCharts::QLineSeries();
+    chartView_ = new QtCharts::QChartView(this);
 
     auto *layout = new QVBoxLayout(this);
     this->setLayout(layout);
-    layout->addWidget(m_chartView);
+    layout->addWidget(chartView_);
 
-    QtCharts::QChart *chart = m_chartView->chart();
+    QtCharts::QChart *chart = chartView_->chart();
 
-    chart->addSeries(m_series);
+    chart->addSeries(series_);
     chart->setTitle("Altitude vs Time");
     chart->legend()->hide();
     chart->createDefaultAxes();
@@ -65,8 +38,8 @@ AltitudeWidget::AltitudeWidget(QWidget *parent) : QWidget(parent)
     chart->layout()->setContentsMargins(0, 0, 0, 0);
     chart->setContentsMargins(-18, -18, -14, -16);
 
-    m_chartView->setRenderHint(QPainter::Antialiasing);
-    m_chartView->setContentsMargins(0, 0, 0, 0);
+    chartView_->setRenderHint(QPainter::Antialiasing);
+    chartView_->setContentsMargins(0, 0, 0, 0);
 
     min_x = std::numeric_limits<double>::max();
     max_x = -std::numeric_limits<double>::max();
@@ -80,7 +53,7 @@ AltitudeWidget::AltitudeWidget(QWidget *parent) : QWidget(parent)
  */
 void AltitudeWidget::addData(qreal tow, qreal altitude)
 {
-    m_altitudeBuffer.push_back(QPointF(tow, altitude));
+    altitudeBuffer_.push_back(QPointF(tow, altitude));
 }
 
 /*!
@@ -88,7 +61,7 @@ void AltitudeWidget::addData(qreal tow, qreal altitude)
  */
 void AltitudeWidget::redraw()
 {
-    if (!m_altitudeBuffer.empty())
+    if (!altitudeBuffer_.empty())
     {
         double min_x = std::numeric_limits<double>::max();
         double max_x = -std::numeric_limits<double>::max();
@@ -96,13 +69,13 @@ void AltitudeWidget::redraw()
         double min_y = std::numeric_limits<double>::max();
         double max_y = -std::numeric_limits<double>::max();
 
-        QtCharts::QChart *chart = m_chartView->chart();
+        QtCharts::QChart *chart = chartView_->chart();
         QPointF p;
         QVector<QPointF> vec;
 
-        for (size_t i = 0; i < m_altitudeBuffer.size(); i++)
+        for (size_t i = 0; i < altitudeBuffer_.size(); i++)
         {
-            p = m_altitudeBuffer.at(i);
+            p = altitudeBuffer_.at(i);
             vec << p;
 
             min_x = std::min(min_x, p.x());
@@ -112,7 +85,7 @@ void AltitudeWidget::redraw()
             max_y = std::max(max_y, p.y());
         }
 
-        m_series->replace(vec);
+        series_->replace(vec);
 
         chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
         chart->axes(Qt::Vertical).back()->setRange(min_y, max_y);
@@ -124,8 +97,8 @@ void AltitudeWidget::redraw()
  */
 void AltitudeWidget::clear()
 {
-    m_altitudeBuffer.clear();
-    m_series->clear();
+    altitudeBuffer_.clear();
+    series_->clear();
 }
 
 /*!
@@ -133,6 +106,6 @@ void AltitudeWidget::clear()
  */
 void AltitudeWidget::setBufferSize(size_t size)
 {
-    m_bufferSize = size;
-    m_altitudeBuffer.resize(m_bufferSize);
+    bufferSize_ = size;
+    altitudeBuffer_.resize(bufferSize_);
 }

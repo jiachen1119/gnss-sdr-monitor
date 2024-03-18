@@ -57,6 +57,7 @@ set(SOURCES
     dop_widget.cpp
         socket/SocketGnss.cpp
         styles/TabBarStyle.cpp
+        lib/Variance.h
     ${PROTO_SRCS}
     ${PROTO_SRCS2}
 )
