@@ -12,7 +12,7 @@
 #include <boost/circular_buffer.hpp>
 #include <QAbstractTableModel>
 #include <QTimer>
-#include "lib/Variance.h"
+#include "Variance.h"
 
 typedef boost::circular_buffer<double> CBuff;
 

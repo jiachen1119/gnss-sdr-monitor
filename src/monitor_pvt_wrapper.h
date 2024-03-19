@@ -13,7 +13,7 @@
 #include <boost/circular_buffer.hpp>
 #include <QObject>
 #include <QVariant>
-#include "lib/Variance.h"
+#include "Variance.h"
 
 class MonitorPvtWrapper : public QObject
 {

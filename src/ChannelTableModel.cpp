@@ -124,7 +124,7 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
                     return QVariant::Invalid;
                 }
             }
-            else if (index.column() == 1)
+            else if (index.column() == CHANNEL_SYSTEM)
             {
                 if (channel.system() == "G")
                     return QIcon(":/images/flag-us.png");

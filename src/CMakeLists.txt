@@ -1,13 +1,17 @@
+# find boost library
 set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost REQUIRED)
 if(NOT Boost_FOUND)
      message(FATAL_ERROR "Fatal error: Boost required.")
 endif()
 
+# find Protobuf library
 find_package(Protobuf REQUIRED)
 if(${Protobuf_VERSION} VERSION_LESS "3.0.0")
      message(FATAL_ERROR "Fatal error: Protocol Buffers > v3.0.0 required.")
 endif()
+
+# generate the header file needed and set auto skip generation on
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_SOURCE_DIR}/src/protobuf/gnss_synchro.proto)
 set_property(SOURCE ${PROTO_SRCS} PROPERTY SKIP_AUTOGEN ON)
 set_property(SOURCE ${PROTO_HDRS} PROPERTY SKIP_AUTOGEN ON)
@@ -16,13 +20,17 @@ protobuf_generate_cpp(PROTO_SRCS2 PROTO_HDRS2 ${CMAKE_SOURCE_DIR}/src/protobuf/m
 set_property(SOURCE ${PROTO_SRCS2} PROPERTY SKIP_AUTOGEN ON)
 set_property(SOURCE ${PROTO_HDRS2} PROPERTY SKIP_AUTOGEN ON)
 
+# find qt library
 find_package(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Quick QuickWidgets Positioning Charts REQUIRED)
 if(NOT Qt5_FOUND)
      message(FATAL_ERROR "Fatal error: Qt5 required.")
 endif(NOT Qt5_FOUND)
 
+# moc is to process the Macro Definition
 set(CMAKE_AUTOMOC ON)
+# uic project in qt is on to process the .ui files
 set(CMAKE_AUTOUIC ON)
+# rcc project is on to process the pictures
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -41,6 +49,15 @@ set(QT5_LIBRARIES
 
 set(TARGET ${CMAKE_PROJECT_NAME})
 
+include_directories(lib)
+add_subdirectory(lib)
+
+include_directories(PVT)
+add_subdirectory(PVT)
+
+include_directories(socket)
+add_subdirectory(socket)
+
 set(SOURCES
         ChannelTableModel.cpp
     cn0_delegate.cpp
@@ -55,13 +72,7 @@ set(SOURCES
     telnet_manager.cpp
     altitude_widget.cpp
     dop_widget.cpp
-        socket/SocketGnss.cpp
         styles/TabBarStyle.cpp
-        lib/Variance.h
-        lib/PVTStruct.h
-        lib/CustomTableView.cpp
-        lib/CustomChannelView.cpp
-        PVT/PVTTableModel.cpp
     ${PROTO_SRCS}
     ${PROTO_SRCS2}
 )
@@ -78,6 +89,6 @@ set(RESOURCES
 
 add_executable(${TARGET} ${SOURCES} ${UI_SOURCES} ${RESOURCES})
 
-target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf)
+target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf LIB PVT_LIB SOCKET_LIB)
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

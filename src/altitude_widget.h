@@ -12,7 +12,7 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QWidget>
-#include "lib/Variance.h"
+#include "Variance.h"
 
 class AltitudeWidget : public QWidget
 {

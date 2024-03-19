@@ -159,7 +159,7 @@
   <customwidget>
    <class>CustomChannelView</class>
    <extends>QTableView</extends>
-   <header location="global">lib/CustomChannelView.h</header>
+   <header location="global">CustomChannelView.h</header>
   </customwidget>
  </customwidgets>
  <resources>

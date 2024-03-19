@@ -10,7 +10,7 @@
 #include <QVariant>
 #include <qdebug.h>
 #include "monitor_pvt.pb.h"
-#include "lib/PVTStruct.h"
+#include "PVTStruct.h"
 #include <QFont>
 
 class PVTTableModel : public QAbstractTableModel
