@@ -13,7 +13,6 @@ class CustomChannelView : public QTableView
 public:
     explicit CustomChannelView(QWidget *parent=nullptr);
     void autoAdjustTableItemWidth();
-    void autoAdjustTableItemHeight();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

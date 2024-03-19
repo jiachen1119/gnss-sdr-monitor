@@ -136,10 +136,10 @@ MainWindow::MainWindow(QWidget *parent)
     // QTableView.
     // Tie the model to the view.
     ui->tableView->setModel(channelTableModel_);
-    ui->tableView->setItemDelegateForColumn(5, new ConstellationDelegate());
-    ui->tableView->setItemDelegateForColumn(6, new Cn0Delegate());
-    ui->tableView->setItemDelegateForColumn(7, new DopplerDelegate());
-    ui->tableView->setItemDelegateForColumn(9, new LedDelegate());
+    ui->tableView->setItemDelegateForColumn(CHANNEL_CONSTELLATION, new ConstellationDelegate());
+    ui->tableView->setItemDelegateForColumn(CHANNEL_CN0, new Cn0Delegate());
+    ui->tableView->setItemDelegateForColumn(CHANNEL_DOPPLER, new DopplerDelegate());
+    ui->tableView->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
 
     // Sockets.
     socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1111);
@@ -370,7 +370,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
     QChartView *chartView = nullptr;
 
-    if (index.column() == 5)  // Constellation
+    if (index.column() == CHANNEL_CONSTELLATION)
     {
         if (plotsConstellation_.find(index.row()) == plotsConstellation_.end())
         {
@@ -417,7 +417,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
             chartView = plotsConstellation_.at(index.row());
         }
     }
-    else if (index.column() == 6)  // CN0
+    else if (index.column() == CHANNEL_CN0)
     {
         if (plotsCn0_.find(index.row()) == plotsCn0_.end())
         {
@@ -460,7 +460,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
             chartView = plotsCn0_.at(index.row());
         }
     }
-    else if (index.column() == 7)  // Doppler
+    else if (index.column() == CHANNEL_DOPPLER)
     {
         if (plotsDoppler_.find(index.row()) == plotsDoppler_.end())
         {

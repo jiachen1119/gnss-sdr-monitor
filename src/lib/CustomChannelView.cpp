@@ -11,8 +11,8 @@ CustomChannelView::CustomChannelView(QWidget *parent) : QTableView (parent)
     this->setShowGrid(false);
 
     this->horizontalHeader()->setMinimumWidth(60);//设置水平单元格最小宽度
-    this->verticalHeader()->setMinimumSectionSize(30);//设置垂直单元格最小高度
-    this->verticalHeader()->setMaximumSectionSize(50);//设置垂直单元格最大高度
+    this->verticalHeader()->setMinimumSectionSize(40);//设置垂直单元格最小高度
+    this->verticalHeader()->setMaximumSectionSize(60);//设置垂直单元格最大高度
 }
 
 void CustomChannelView::resizeEvent(QResizeEvent *event)
@@ -61,29 +61,5 @@ void CustomChannelView::autoAdjustTableItemWidth()
         hHeaderView->resizeSection(hHeaderView->count() - 1, hHeaderWidth - width_sum);
         // 关闭水平滚动条，因为此时表头宽度已经足够显示所有列
         this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    }
-}
-
-void CustomChannelView::autoAdjustTableItemHeight()
-{
-    // 获取垂直表头
-    QHeaderView *vHeaderView = this->verticalHeader();
-    // 获取垂直表头的高度
-    int vHeaderHeight = vHeaderView->height();
-    // 计算每行的理论高度，以保证均匀分配表头高度
-    int cell_height = vHeaderHeight / vHeaderView->count();
-
-    // 如果每行的理论高度大于最大值
-    if(cell_height > vHeaderView->maximumSectionSize()){
-        // 将表头的调整模式设置为交互式
-        vHeaderView->setSectionResizeMode(QHeaderView::Interactive);
-
-        // 将所有行的高度设置为最大值
-        for(int row = 0; row < vHeaderView->count(); row++)
-            vHeaderView->resizeSection(row, vHeaderView->maximumSectionSize());
-    }
-    else{
-        // 如果理论高度小于等于最大值，将表头的调整模式设置为拉伸（Stretch）
-        vHeaderView->setSectionResizeMode(QHeaderView::Stretch);
     }
 }

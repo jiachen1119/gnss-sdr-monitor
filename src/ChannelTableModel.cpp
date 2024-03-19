@@ -16,7 +16,7 @@ ChannelTableModel::ChannelTableModel()
     mapSignalName_["5X"] = "E5a";
     mapSignalName_["L5"] = "L5";
 
-    columns_ = 11;
+    columns_ = 10;
     bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
 
     checkTimer_.setInterval(500);
@@ -88,37 +88,25 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
             {
                 switch (index.column())
                 {
-                case 0:
+                case CHANNEL_ID:
                     return channel.channel_id();
-
-                case 1:
+                case CHANNEL_SYSTEM:
                     return channel_signal;
-
-                case 2:
+                case CHANNEL_PRN:
                     return channel.prn();
-
-                case 3:
+                case CHANNEL_ACQ_DOPPLER:
                     return channel.acq_doppler_hz();
-
-                case 4:
-                    return channel.acq_delay_samples();
-
-                case 5:
+                case CHANNEL_CONSTELLATION:
                     return channel_prompt_iq;
-
-                case 6:
+                case CHANNEL_CN0:
                     return channel_cn0;
-
-                case 7:
+                case CHANNEL_DOPPLER:
                     return channel_doppler;
-
-                case 8:
+                case CHANNEL_TOW:
                     return channel.tow_at_current_symbol_ms();
-
-                case 9:
+                case CHANNEL_TLM:
                     return channel.flag_valid_word();
-
-                case 10:
+                case CHANNEL_PSEUDORANGE:
                     return QString::number(channel.pseudorange_m(),'f',3);
                 }
             }
@@ -126,10 +114,10 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
             {
                 switch (index.column())
                 {
-                case 6:
+                case 5:
                     return cn0_cbuf.back();
 
-                case 7:
+                case 6:
                     return doppler_cbuf.back();
 
                 default:
@@ -173,33 +161,33 @@ QVariant ChannelTableModel::headerData(int section,Qt::Orientation orientation,
         if (orientation == Qt::Horizontal){
             switch (section)
             {
-            case 0:
+            case CHANNEL_ID:
                 return "CH";
-            case 1:
+            case CHANNEL_SYSTEM:
                 return "Signal";
-            case 2:
+            case CHANNEL_PRN:
                 return "PRN";
-            case 3:
+            case CHANNEL_ACQ_DOPPLER:
                 return "ACQ Doppler [Hz]";
-            case 4:
-                return "ACQ Code Phase [samples]";
-            case 5:
+            case CHANNEL_CONSTELLATION:
                 return "Constellation";
-            case 6:
+            case CHANNEL_CN0:
                 return "C/N0 [dB-Hz]";
-            case 7:
+            case CHANNEL_DOPPLER:
                 return "Doppler [Hz]";
-            case 8:
+            case CHANNEL_TOW:
                 return "TOW [ms]";
-            case 9:
+            case CHANNEL_TLM:
                 return "TLM";
-            case 10:
+            case CHANNEL_PSEUDORANGE:
                 return "Pseudorange [m]";
             default:
                 return QVariant::Invalid;
             }
         }
     }
+    if (role == Qt::FontRole)
+        return QFont("Calibri", 12, QFont::Normal);
     return QVariant::Invalid;
 }
 
