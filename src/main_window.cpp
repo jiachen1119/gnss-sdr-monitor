@@ -596,39 +596,54 @@ void MainWindow::tabBarSetting()
     ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map2.svg"));
     ui->tabWidget_main->tabBar()->setTabText(1, QStringLiteral("Solution"));
 
-    ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/settings2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(2, QStringLiteral("Settings"));
+    ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/alarm2.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(2, QStringLiteral("Alarm"));
 
-    ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/about2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(3, QStringLiteral("About"));
+    ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/settings2.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(3, QStringLiteral("Settings"));
+
+    ui->tabWidget_main->tabBar()->setTabIcon(4,QIcon(":/images/about2.svg"));
+    ui->tabWidget_main->tabBar()->setTabText(4, QStringLiteral("About"));
 
     // 设置Icon切换
     connect(ui->tabWidget_main,&QTabWidget::currentChanged, this,
         [=](int index){
-            if (index == 0){
+            if (index == TAB_DASHBORAD){
                 ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/about2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/alarm2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(4,QIcon(":/images/about2.svg"));
             }
-            else if (index == 1){
+            else if (index == TAB_SOLUTION){
                 ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/about2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/alarm2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(4,QIcon(":/images/about2.svg"));
             }
-            else if (index == 2)
+            else if (index == TAB_ALARM)
             {
                 ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/settings.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/about2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about2.svg"));
+            }
+            else if (index == TAB_SETTINGS)
+            {
+                ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about2.svg"));
             }
             else{
                 ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/about.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings2.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about.svg"));
             }
         });
 }
