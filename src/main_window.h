@@ -30,6 +30,7 @@
 #include <QTimer>
 #include <QXYSeries>
 #include <QtNetwork/QUdpSocket>
+#include "lib/CustomTableView.h"
 
 
 namespace Ui

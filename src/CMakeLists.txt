@@ -59,6 +59,8 @@ set(SOURCES
         styles/TabBarStyle.cpp
         lib/Variance.h
         lib/PVTStruct.h
+        lib/CustomTableView.cpp
+        lib/CustomChannelView.cpp
         PVT/PVTTableModel.cpp
     ${PROTO_SRCS}
     ${PROTO_SRCS2}

@@ -76,9 +76,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tab_2->setLayout(layout_map);
 
     // PVT widget.
-    auto solution_table = new QTableView(ui->tab_2);
+    auto solution_table = new CustomTableView(ui->tab_2);
     solution_table->horizontalHeader()->hide();
-    solution_table->resizeColumnsToContents();
     pvtTableModel_ = new PVTTableModel(solution_table);
     solution_table->setModel(pvtTableModel_);
     layout_map->addWidget(solution_table);
@@ -137,17 +136,10 @@ MainWindow::MainWindow(QWidget *parent)
     // QTableView.
     // Tie the model to the view.
     ui->tableView->setModel(channelTableModel_);
-    ui->tableView->setShowGrid(false);
-    ui->tableView->verticalHeader()->hide();
-    ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->setItemDelegateForColumn(5, new ConstellationDelegate());
     ui->tableView->setItemDelegateForColumn(6, new Cn0Delegate());
     ui->tableView->setItemDelegateForColumn(7, new DopplerDelegate());
     ui->tableView->setItemDelegateForColumn(9, new LedDelegate());
-
-    ui->tableView->resizeColumnsToContents();
-    // ui->tableView->setAlternatingRowColors(true);
-    // ui->tableView->setSelectionBehavior(QTableView::SelectRows);
 
     // Sockets.
     socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1111);

@@ -8,7 +8,7 @@ PVTTableModel::PVTTableModel(QObject *parent) : QAbstractTableModel(parent){
 
 QVariant PVTTableModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::DisplayRole || role == Qt::ToolTipRole){
+    if (role == Qt::DisplayRole){
         try
         {
             switch (index.row())
@@ -49,6 +49,9 @@ QVariant PVTTableModel::data(const QModelIndex &index, int role) const
             return QVariant::Invalid;
         }
     }
+    if (role == Qt::FontRole)
+        return QFont("Calibri", 15, QFont::Medium);
+
     if (role == Qt::TextAlignmentRole)
         return Qt::AlignCenter;
     return QVariant::Invalid;
@@ -91,6 +94,8 @@ QVariant PVTTableModel::headerData(int section, Qt::Orientation orientation, int
             }
         }
     }
+    if (role == Qt::FontRole)
+        return QFont("Calibri", 15, QFont::Medium);
     if (role == Qt::TextAlignmentRole)
         return Qt::AlignCenter;
     return QVariant::Invalid;
