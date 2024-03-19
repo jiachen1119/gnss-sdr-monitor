@@ -49,32 +49,20 @@ set(QT5_LIBRARIES
 
 set(TARGET ${CMAKE_PROJECT_NAME})
 
-include_directories(lib)
+include_directories(lib PVT socket styles)
+
+# 一定不能写多个，如果是add_subdirectory(lib PVT)也就意味着在PVT文件夹生成lib.a的库文件了，PVT的库无法生成
 add_subdirectory(lib)
+add_subdirectory(styles)
 
-include_directories(PVT)
-add_subdirectory(PVT)
-
-include_directories(socket)
-add_subdirectory(socket)
+aux_source_directory(. SRC_SOURCE)
 
 set(SOURCES
-        ChannelTableModel.cpp
-    cn0_delegate.cpp
-    constellation_delegate.cpp
-    doppler_delegate.cpp
-    led_delegate.cpp
-    main.cpp
-    main_window.cpp
-    monitor_pvt_wrapper.cpp
-    preferences_dialog.cpp
-    telecommand_widget.cpp
-    telnet_manager.cpp
-    altitude_widget.cpp
-    dop_widget.cpp
-        styles/TabBarStyle.cpp
-    ${PROTO_SRCS}
-    ${PROTO_SRCS2}
+        ${SRC_SOURCE}
+        socket/SocketGnss.cpp
+        PVT/PVTTableModel.cpp
+        ${PROTO_SRCS}
+        ${PROTO_SRCS2}
 )
 
 set(UI_SOURCES
@@ -83,12 +71,10 @@ set(UI_SOURCES
     telecommand_widget.ui
 )
 
-set(RESOURCES
-    resources.qrc
-)
+set(RESOURCES resources.qrc)
 
 add_executable(${TARGET} ${SOURCES} ${UI_SOURCES} ${RESOURCES})
 
-target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf LIB PVT_LIB SOCKET_LIB)
+target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf LIB STYLES)
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

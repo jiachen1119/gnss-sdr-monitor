@@ -1,8 +1,7 @@
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PVT_SOURCE)
 add_library(PVT_LIB ${PVT_SOURCE})
 
-set(PROTOBUF_SOURCE ${CMAKE_BINARY_DIR}/src)
-include_directories(${PROTOBUF_SOURCE})
+include_directories(${CMAKE_BINARY_DIR}/src)
 
 set(QT5_LIBRARIES
         Qt5::Core
