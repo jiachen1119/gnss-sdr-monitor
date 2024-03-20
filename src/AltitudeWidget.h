@@ -13,6 +13,7 @@
 #include <QLineSeries>
 #include <QWidget>
 #include "Variance.h"
+#include "CustomChartView.h"
 
 class AltitudeWidget : public QWidget
 {
@@ -30,14 +31,7 @@ public slots:
 private:
     size_t bufferSize_;
     boost::circular_buffer<QPointF> altitudeBuffer_;
-    QtCharts::QChartView *chartView_ = nullptr;
-    QtCharts::QLineSeries *series_ = nullptr;
-
-    double min_x;
-    double min_y;
-
-    double max_x;
-    double max_y;
+    std::unique_ptr<CustomChartView> chartView_;
 };
 
 #endif  // GNSS_SDR_MONITOR_ALTITUDE_WIDGET_H_

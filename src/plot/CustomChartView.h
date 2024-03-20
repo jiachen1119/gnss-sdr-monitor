@@ -8,6 +8,7 @@
 #include <QtCharts>
 #include <QTimer>
 #include "Variance.h"
+#include <boost/circular_buffer.hpp>
 
 class CustomChartView : public QtCharts::QChartView
 {
@@ -18,6 +19,7 @@ public:
     void setAxisTitle(const QString& x_title,const QString& y_title);
     void updateChart(const QModelIndex &index);
     void updateCN0Chart(const QModelIndex &index);
+    void updateChart_noIndex(boost::circular_buffer<QPointF> buffer);
 
 private:
     std::unique_ptr<QtCharts::QChart> chart_;

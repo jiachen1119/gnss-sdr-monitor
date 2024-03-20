@@ -25,7 +25,7 @@ public:
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    void updatePVT(const gnss_sdr::MonitorPvt& in);
+    PVTStruct updatePVT(const gnss_sdr::MonitorPvt& in);
 public slots:
     void update();
 private:

@@ -14,6 +14,7 @@
 #include <QObject>
 #include <QVariant>
 #include "Variance.h"
+#include "PVTStruct.h"
 
 class MonitorPvtWrapper : public QObject
 {
@@ -23,9 +24,7 @@ class MonitorPvtWrapper : public QObject
 
 public:
     explicit MonitorPvtWrapper(QObject *parent = nullptr);
-    void addMonitorPvt(const gnss_sdr::MonitorPvt &monitor_pvt);
-
-    gnss_sdr::MonitorPvt getLastMonitorPvt();
+    void addMonitorPvt(const PVTStruct &struct_in);
 
     QVariant position() const;
     QVariantList path() const;
@@ -47,7 +46,7 @@ public slots:
 
 private:
     size_t bufferSize_;
-    boost::circular_buffer<gnss_sdr::MonitorPvt> bufferMonitorPvt_;
+    boost::circular_buffer<PVTStruct> bufferMonitorPvt_;
     boost::circular_buffer<Coordinates> path_;
 };
 

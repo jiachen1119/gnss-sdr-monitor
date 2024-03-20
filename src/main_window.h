@@ -11,12 +11,12 @@
 #ifndef GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 #define GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 
+#include "AltitudeWidget.h"
 #include "ChannelTableModel.h"
 #include "CustomChartView.h"
 #include "CustomTableView.h"
 #include "PVTTableModel.h"
 #include "SocketGnss.h"
-#include "altitude_widget.h"
 #include "dop_widget.h"
 #include "gnss_synchro.pb.h"
 #include "monitor_pvt.pb.h"

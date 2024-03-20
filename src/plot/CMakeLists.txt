@@ -8,4 +8,4 @@ set(QT5_LIBRARIES
         Qt5::PrintSupport
         Qt5::Charts
 )
-target_link_libraries(PLOT PUBLIC ${QT5_LIBRARIES})
+target_link_libraries(PLOT PUBLIC ${QT5_LIBRARIES} Boost::boost)

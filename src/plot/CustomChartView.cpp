@@ -86,13 +86,52 @@ void CustomChartView::updateCN0Chart(const QModelIndex &index)
     chart_->axes(Qt::Vertical).back()->setRange(25,55);
 }
 
+void CustomChartView::updateChart_noIndex(boost::circular_buffer<QPointF> buffer)
+{
+    if (!buffer.empty())
+    {
+        double min_x = std::numeric_limits<double>::max();
+        double max_x = -std::numeric_limits<double>::max();
+
+        double min_y = std::numeric_limits<double>::max();
+        double max_y = -std::numeric_limits<double>::max();
+
+        QVector<QPointF> points;
+
+        for (auto i : buffer)
+        {
+            points << i;
+            min_x = std::min(min_x, i.x());
+            min_y = std::min(min_y, i.y());
+
+            max_x = std::max(max_x, i.x());
+            max_y = std::max(max_y, i.y());
+        }
+
+        if (isPoint_)
+            scatterSeries_->replace(points);
+        else
+            lineSeries_->replace(points);
+
+        chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
+        chart_->axes(Qt::Vertical).back()->setRange(min_y, max_y);
+    }
+}
+
 void CustomChartView::setTitle(const QString& title)
 {
     chart_->setTitle(title);
+    chart_->setTitleFont(QFont("Calibri", 16, QFont::Bold));
 }
 
 void CustomChartView::setAxisTitle(const QString& x_title, const QString& y_title)
 {
     chart_->axes(Qt::Horizontal).back()->setTitleText(x_title);
+    chart_->axes(Qt::Horizontal).back()->setTitleFont(QFont("Calibri", 13, QFont::DemiBold));
+    chart_->axes(Qt::Horizontal).back()->setLabelsFont(QFont("Calibri", 12, QFont::Medium));
+
     chart_->axes(Qt::Vertical).back()->setTitleText(y_title);
+    chart_->axes(Qt::Vertical).back()->setTitleFont(QFont("Calibri", 13, QFont::DemiBold));
+    chart_->axes(Qt::Vertical).back()->setLabelsFont(QFont("Calibri", 12, QFont::Medium));
+
 }

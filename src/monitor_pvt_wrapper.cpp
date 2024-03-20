@@ -28,25 +28,19 @@ MonitorPvtWrapper::MonitorPvtWrapper(QObject *parent) : QObject(parent)
 /*!
  Populates the internal data structures with the data of the \a monitor_pvt MonitorPvt object.
  */
-void MonitorPvtWrapper::addMonitorPvt(const gnss_sdr::MonitorPvt &monitor_pvt)
+void MonitorPvtWrapper::addMonitorPvt(const PVTStruct &struct_in)
 {
-    bufferMonitorPvt_.push_back(monitor_pvt);
+    bufferMonitorPvt_.push_back(struct_in);
 
-    Coordinates coord{monitor_pvt.latitude(),monitor_pvt.longitude()};
+    Coordinates coord{struct_in.latitude,struct_in.longitude};
     path_.push_back(coord);
 
     emit dataChanged();
-    emit altitudeChanged(monitor_pvt.tow_at_current_symbol_ms(), monitor_pvt.height());
-    emit dopChanged(monitor_pvt.tow_at_current_symbol_ms(), monitor_pvt.gdop(), monitor_pvt.pdop(), monitor_pvt.hdop(), monitor_pvt.vdop());
+    emit altitudeChanged(struct_in.tow, struct_in.height);
+    emit dopChanged(struct_in.tow, struct_in.gdop, struct_in.pdop,
+        struct_in.hdop, struct_in.vdop);
 }
 
-/*!
- Gets the last MonitorPvt object.
- */
-gnss_sdr::MonitorPvt MonitorPvtWrapper::getLastMonitorPvt()
-{
-    return bufferMonitorPvt_.back();
-}
 
 /*!
  Clears all the data from the internal data structures.
@@ -76,7 +70,7 @@ QVariant MonitorPvtWrapper::position() const
     if (!bufferMonitorPvt_.empty())
     {
         auto pvt = bufferMonitorPvt_.back();
-        return QVariant::fromValue(QGeoCoordinate(pvt.latitude(), pvt.longitude()));
+        return QVariant::fromValue(QGeoCoordinate(pvt.latitude, pvt.longitude));
     }
     else
     {

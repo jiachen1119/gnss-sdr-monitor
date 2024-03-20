@@ -70,9 +70,32 @@ MainWindow::MainWindow(QWidget *parent)
     ui->telecomWidget->setMaximumHeight(this->height()/2);
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
-    // map tab setting
+    // map tab page setting
     auto layout_map = new QHBoxLayout(ui->tab_2);
     ui->tab_2->setLayout(layout_map);
+
+    // alarm tab page setting
+    auto layout_alarm = new QVBoxLayout(ui->tabWidget_main->widget(2));
+    layout_alarm->setStretch(0,2);
+    layout_alarm->setStretch(1,1);
+
+    auto layout_AL = new QHBoxLayout();
+    layout_AL->setStretch(0,2);
+    layout_AL->setStretch(1,3);
+    layout_alarm->addLayout(layout_AL);
+
+    auto alAL = new CustomChartView(nullptr, false);
+    alAL->setTitle(QStringLiteral("AL Level"));
+    alAL->setAxisTitle("Time (s)","Level");
+
+    auto alPosition = new CustomChartView(nullptr, false);
+    alPosition->setTitle(QStringLiteral("Position after Correction"));
+
+    layout_AL->addWidget(alAL);
+    layout_AL->addWidget(alPosition);
+
+    auto alLog = new QTextBrowser;
+    layout_alarm->addWidget(alLog);
 
     // PVT widget.
     auto solution_table = new CustomTableView(ui->tab_2);
@@ -173,63 +196,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QMainWindow::closeEvent(event);
 }
 
-void MainWindow::updateChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index)
-{
-    QPointF p;
-    QVector<QPointF> points;
-
-    double min_x = std::numeric_limits<double>::max();
-    double max_x = -std::numeric_limits<double>::max();
-
-    double min_y = std::numeric_limits<double>::max();
-    double max_y = -std::numeric_limits<double>::max();
-
-    QList<QVariant> var = index.data(Qt::DisplayRole).toList();
-    for (const auto & i : var)
-    {
-        p = i.toPointF();
-        points << p;
-
-        min_x = std::min(min_x, p.x());
-        max_x = std::max(max_x, p.x());
-        min_y = std::min(min_y, p.y());
-        max_y = std::max(max_y, p.y());
-    }
-    series->replace(points);
-
-    chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
-    chart->axes(Qt::Vertical).back()->setRange(min_y, max_y);
-}
-
-void MainWindow::updateCnoChart(QtCharts::QChart *chart, QtCharts::QXYSeries *series, const QModelIndex &index)
-{
-    QPointF p;
-    QVector<QPointF> points;
-
-    double min_x = std::numeric_limits<double>::max();
-    double max_x = -std::numeric_limits<double>::max();
-
-    double min_y = std::numeric_limits<double>::max();
-    double max_y = -std::numeric_limits<double>::max();
-
-    QList<QVariant> var = index.data(Qt::DisplayRole).toList();
-    for (const auto & i : var)
-    {
-        p = i.toPointF();
-        points << p;
-
-        min_x = std::min(min_x, p.x());
-        min_y = std::min(min_y, p.y());
-
-        max_x = std::max(max_x, p.x());
-        max_y = std::max(max_y, p.y());
-    }
-    chart->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
-    chart->axes(Qt::Vertical).back()->setRange(25, 53);
-    series->replace(points);
-}
-
-
 void MainWindow::toggleCapture()
 {
     if (start_->isEnabled())
@@ -260,6 +226,7 @@ void MainWindow::receiveGnssSynchro(gnss_sdr::Observables stocks)
 
 void MainWindow::receiveMonitorPvt()
 {
+    // 当有消息待处理
     while (socketMonitorPvt_->hasPendingDatagrams())
     {
         QNetworkDatagram datagram = socketMonitorPvt_->receiveDatagram();
@@ -267,8 +234,8 @@ void MainWindow::receiveMonitorPvt()
 
         if (stop_->isEnabled())
         {
-            monitorPvtWrapper_->addMonitorPvt(monitorPvt_);
-            pvtTableModel_->updatePVT(monitorPvt_);
+            auto pvtStruct = pvtTableModel_->updatePVT(monitorPvt_);
+            monitorPvtWrapper_->addMonitorPvt(pvtStruct);
             // clear->setEnabled(true);
         }
     }
