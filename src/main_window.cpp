@@ -6,7 +6,6 @@
  * Kepeng Luan changed, Southeast University, 2023-2024
  */
 
-
 #include "main_window.h"
 #include "cn0_delegate.h"
 #include "constellation_delegate.h"
@@ -641,7 +640,7 @@ void MainWindow::tabBarSetting()
             else{
                 ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm.svg"));
+                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm2.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings2.svg"));
                 ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about.svg"));
             }

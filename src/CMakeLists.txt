@@ -49,11 +49,12 @@ set(QT5_LIBRARIES
 
 set(TARGET ${CMAKE_PROJECT_NAME})
 
-include_directories(lib PVT socket styles)
+include_directories(lib PVT socket styles plot)
 
 # 一定不能写多个，如果是add_subdirectory(lib PVT)也就意味着在PVT文件夹生成lib.a的库文件了，PVT的库无法生成
 add_subdirectory(lib)
 add_subdirectory(styles)
+add_subdirectory(plot)
 
 aux_source_directory(. SRC_SOURCE)
 
@@ -75,6 +76,6 @@ set(RESOURCES resources.qrc)
 
 add_executable(${TARGET} ${SOURCES} ${UI_SOURCES} ${RESOURCES})
 
-target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf LIB STYLES)
+target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf LIB STYLES PLOT)
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

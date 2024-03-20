@@ -9,6 +9,7 @@
 // 输出频率默认为20ms，这里放大了五倍，也就是100ms输出一次
 // 如果size为1000，也就是绘图将会展示100s的数据
 #define BUFFER_SIZE_FOR_CHANNEL 600
+#define TIMER_MS_FOR_CHANNEL 500
 
 // PVT的输出频率为100ms,为了展示10s的路径和位置信息，size设置为100
 #define BUFFER_SIZE_FOR_PVT 100

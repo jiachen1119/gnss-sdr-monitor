@@ -12,13 +12,15 @@
 #define GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 
 #include "ChannelTableModel.h"
+#include "CustomChartView.h"
+#include "CustomTableView.h"
 #include "PVTTableModel.h"
+#include "SocketGnss.h"
 #include "altitude_widget.h"
 #include "dop_widget.h"
 #include "gnss_synchro.pb.h"
 #include "monitor_pvt.pb.h"
 #include "monitor_pvt_wrapper.h"
-#include "SocketGnss.h"
 #include "styles/TabBarStyle.h"
 #include "telecommand_widget.h"
 #include <QAbstractTableModel>
@@ -30,17 +32,11 @@
 #include <QTimer>
 #include <QXYSeries>
 #include <QtNetwork/QUdpSocket>
-#include "CustomTableView.h"
 
 
 namespace Ui
 {
 class MainWindow;
-}
-
-namespace QtCharts
-{
-class QChart;
 }
 
 class MainWindow : public QMainWindow
