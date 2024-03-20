@@ -367,35 +367,16 @@ void MainWindow::expandPlot(const QModelIndex &index)
 {
     int channel_id = channelTableModel_->getChannelId(index.row());
 
-    QChartView *chartView = nullptr;
+    CustomChartView *chartView = nullptr;
 
     if (index.column() == CHANNEL_CONSTELLATION)
     {
         if (plotsConstellation_.find(index.row()) == plotsConstellation_.end())
         {
-            auto *chart = new QChart();  // has no parent!
-            chart->setTitle("Channel " + QString::number(channel_id));
-            chart->legend()->hide();
-
-            // 散点图
-            auto *series = new QScatterSeries(chart);
-            // 设置点的大小
-            series->setMarkerSize(8);
-
-            chart->addSeries(series);
-            chart->createDefaultAxes();
-            chart->axes(Qt::Horizontal).back()->setTitleText("I prompt");
-            chart->axes(Qt::Vertical).back()->setTitleText("Q prompt");
-            chart->layout()->setContentsMargins(0, 0, 0, 0);
-            chart->setContentsMargins(-18, -18, -14, -16);
-
-            chartView = new QChartView(chart);
-            // 抗锯齿
-            chartView->setRenderHint(QPainter::Antialiasing, true);
-            chartView->setContentsMargins(0, 0, 0, 0);
-
-            // Draw chart now.
-            updateChart(chart, series, index);
+            chartView = new CustomChartView(nullptr, true);
+            chartView->setTitle("Channel " + QString::number(channel_id)+" Constellation");
+            chartView->setAxisTitle("I prompt","Q prompt");
+            chartView->updateChart(index);
 
             // Delete the chartView object when MainWindow is closed.
             connect(this, &QMainWindow::destroyed, chartView, &QObject::deleteLater);
@@ -405,8 +386,8 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsConstellation_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, chart, [ chart, series, index]() {
-                updateChart(chart, series, index);
+            connect(&updateTimer_, &QTimer::timeout, this, [index,chartView]() {
+                chartView->updateChart(index);
             });
 
             plotsConstellation_[index.row()] = chartView;
@@ -420,25 +401,11 @@ void MainWindow::expandPlot(const QModelIndex &index)
     {
         if (plotsCn0_.find(index.row()) == plotsCn0_.end())
         {
-            auto *chart = new QChart();  // has no parent!
-            chart->setTitle("CN0 CH " + QString::number(channel_id));
-            chart->legend()->hide();
-
-            auto *series = new QLineSeries(chart);
-            chart->addSeries(series);
-            chart->createDefaultAxes();
-            chart->axes(Qt::Horizontal).back()->setTitleText("TOW [s]");
-            chart->axes(Qt::Vertical).back()->setTitleText("C/N0 [db-Hz]");
-            chart->axes(Qt::Vertical).back()->setRange(10,55);
-            chart->layout()->setContentsMargins(0, 0, 0, 0);
-            chart->setContentsMargins(-18, -18, -14, -16);
-
-            chartView = new QChartView(chart);
-            chartView->setRenderHint(QPainter::Antialiasing);
-            chartView->setContentsMargins(0, 0, 0, 0);
-
-            // Draw chart now.
-            updateCnoChart(chart, series, index);
+            // 必须是空指针，否则不会出现独立窗口
+            chartView = new CustomChartView(nullptr, false);
+            chartView->setTitle("CN0 CH " + QString::number(channel_id));
+            chartView->setAxisTitle("TOW [s]","C/N0 [db-Hz]");
+            chartView->updateCN0Chart(index);
 
             // Delete the chartView object when MainWindow is closed.
             connect(this, &QMainWindow::destroyed, chartView, &QObject::deleteLater);
@@ -448,8 +415,8 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsCn0_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, chart, [ chart, series, index]() {
-                updateCnoChart(chart, series, index);
+            connect(&updateTimer_, &QTimer::timeout, this, [index,chartView]() {
+                chartView->updateCN0Chart(index);
             });
 
             plotsCn0_[index.row()] = chartView;
@@ -461,26 +428,15 @@ void MainWindow::expandPlot(const QModelIndex &index)
     }
     else if (index.column() == CHANNEL_DOPPLER)
     {
+
         if (plotsDoppler_.find(index.row()) == plotsDoppler_.end())
         {
-            auto *chart = new QChart();  // has no parent!
-            chart->setTitle("Doppler CH " + QString::number(channel_id));
-            chart->legend()->hide();
-
-            auto *series = new QLineSeries(chart);
-            chart->addSeries(series);
-            chart->createDefaultAxes();
-            chart->axes(Qt::Horizontal).back()->setTitleText("TOW [s]");
-            chart->axes(Qt::Vertical).back()->setTitleText("Doppler [Hz]");
-            chart->layout()->setContentsMargins(0, 0, 0, 0);
-            chart->setContentsMargins(-18, -18, -14, -16);
-
-            chartView = new QChartView(chart);
-            chartView->setRenderHint(QPainter::Antialiasing);
-            chartView->setContentsMargins(0, 0, 0, 0);
+            chartView = new CustomChartView(nullptr, false);
+            chartView->setTitle("Doppler CH " + QString::number(channel_id));
+            chartView->setAxisTitle("TOW [s]","Doppler [Hz]");
 
             // Draw chart now.
-            updateChart(chart, series, index);
+            chartView->updateChart(index);
 
             // Delete the chartView object when MainWindow is closed.
             connect(this, &QMainWindow::destroyed, chartView, &QObject::deleteLater);
@@ -490,8 +446,8 @@ void MainWindow::expandPlot(const QModelIndex &index)
                 [this, index]() { plotsDoppler_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, chart, [ chart, series, index]() {
-                updateChart(chart, series, index);
+            connect(&updateTimer_, &QTimer::timeout, this, [ index,chartView]() {
+                chartView->updateChart(index);
             });
 
             plotsDoppler_[index.row()] = chartView;
@@ -509,7 +465,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
     chartView->resize(screenWidth_/2, screenHeight_/2);
     chartView->show();
-    chartView->raise();
+//    chartView->raise();
 }
 
 void MainWindow::closePlots()

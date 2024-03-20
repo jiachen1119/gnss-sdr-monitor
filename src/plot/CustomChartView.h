@@ -16,8 +16,6 @@ public:
     explicit CustomChartView(QWidget *parent, bool isPoint);
     void setTitle(const QString& title);
     void setAxisTitle(const QString& x_title,const QString& y_title);
-
-public slots:
     void updateChart(const QModelIndex &index);
     void updateCN0Chart(const QModelIndex &index);
 
@@ -26,6 +24,7 @@ private:
     std::unique_ptr<QLineSeries> lineSeries_;
     std::unique_ptr<QScatterSeries> scatterSeries_;
 
+    bool isPoint_ = false;
 };
 
 

@@ -105,9 +105,9 @@ private:
 
     int bufferSize_;
 
-    std::map<int, QtCharts::QChartView *> plotsConstellation_;
-    std::map<int, QtCharts::QChartView *> plotsCn0_;
-    std::map<int, QtCharts::QChartView *> plotsDoppler_;
+    std::map<int, CustomChartView *> plotsConstellation_;
+    std::map<int, CustomChartView *> plotsCn0_;
+    std::map<int, CustomChartView *> plotsDoppler_;
 };
 
 #endif  // GNSS_SDR_MONITOR_MAIN_WINDOW_H_

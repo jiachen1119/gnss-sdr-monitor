@@ -5,17 +5,21 @@
 #include "CustomChartView.h"
 CustomChartView::CustomChartView(QWidget *parent, bool isPoint) : QChartView(parent) {
 
+    isPoint_ = isPoint;
+
     // 抗锯齿
     this->setRenderHint(QPainter::Antialiasing, true);
     this->setContentsMargins(0,0,0,0);
 
     // 不去设置parent
     chart_ = std::make_unique<QChart>();
+    // 必须设置chartview的chart，否则不会出现图线
+    this->setChart(chart_.get());
+    chart_->legend()->hide();
     if (isPoint){
         scatterSeries_ = std::make_unique<QScatterSeries>(chart_.get());
         scatterSeries_->setMarkerSize(8);
         chart_->addSeries(scatterSeries_.get());
-        chart_->legend()->hide();
     }
     else{
         lineSeries_ = std::make_unique<QLineSeries>(chart_.get());
@@ -50,7 +54,10 @@ void CustomChartView::updateChart(const QModelIndex &index)
         min_y = std::min(min_y, p.y());
         max_y = std::max(max_y, p.y());
     }
-    lineSeries_->replace(points);
+    if (isPoint_)
+        scatterSeries_->replace(points);
+    else
+        lineSeries_->replace(points);
 
     chart_->axes(Qt::Horizontal).back()->setRange(min_x,max_x);
     chart_->axes(Qt::Vertical).back()->setRange(min_y,max_y);
