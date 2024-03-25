@@ -23,8 +23,8 @@ AltitudeWidget::AltitudeWidget(QWidget *parent) : QWidget(parent)
     auto layout = new QVBoxLayout(this);
     chartView_ = std::make_unique<CustomChartView>(nullptr, false);
     layout->addWidget(chartView_.get());
-    chartView_->setTitle("Altitude vs Time");
-    chartView_->setAxisTitle("TOW [s]","Altitude [m]");
+    chartView_->setTitle("Altitude");
+    chartView_->setAxisTitle("TOW (s)","Altitude (m)");
 }
 
 /*!

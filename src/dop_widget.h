@@ -15,6 +15,7 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QWidget>
+#include "Variance.h"
 
 class DOPWidget : public QWidget
 {
@@ -32,16 +33,16 @@ public slots:
 private:
     void populateSeries(boost::circular_buffer<QPointF> queue, QtCharts::QLineSeries *series);
 
-    size_t m_bufferSize;
+    size_t bufferSize_;
 
-    boost::circular_buffer<QPointF> m_gdopBuffer;
-    boost::circular_buffer<QPointF> m_pdopBuffer;
-    boost::circular_buffer<QPointF> m_hdopBuffer;
-    boost::circular_buffer<QPointF> m_vdopBuffer;
+    boost::circular_buffer<QPointF> gdopBuffer_;
+    boost::circular_buffer<QPointF> pdopBuffer_;
+    boost::circular_buffer<QPointF> hdopBuffer_;
+    boost::circular_buffer<QPointF> vdopBuffer_;
 
     QtCharts::QChartView *m_chartView = nullptr;
 
-    QtCharts::QLineSeries *m_gdopSeries = nullptr;
+    QtCharts::QLineSeries *gdopSeries_ = nullptr;
     QtCharts::QLineSeries *m_pdopSeries = nullptr;
     QtCharts::QLineSeries *m_hdopSeries = nullptr;
     QtCharts::QLineSeries *m_vdopSeries = nullptr;

@@ -109,7 +109,7 @@ int PVTTableModel::columnCount(const QModelIndex &parent) const
     return 1;
 }
 
-PVTStruct PVTTableModel::updatePVT(const gnss_sdr::MonitorPvt &in)
+PVTStruct PVTTableModel::populatePVT(const gnss_sdr::MonitorPvt &in)
 {
     PVTStruct output{
         in.tow_at_current_symbol_ms(),
@@ -133,4 +133,9 @@ void PVTTableModel::update()
 {
     beginResetModel();
     endResetModel();
+}
+
+void PVTTableModel::clearData()
+{
+    pvtStruct_={};
 }

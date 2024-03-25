@@ -234,7 +234,7 @@ void MainWindow::receiveMonitorPvt()
 
         if (stop_->isEnabled())
         {
-            auto pvtStruct = pvtTableModel_->updatePVT(monitorPvt_);
+            auto pvtStruct = pvtTableModel_->populatePVT(monitorPvt_);
             monitorPvtWrapper_->addMonitorPvt(pvtStruct);
             // clear->setEnabled(true);
         }
@@ -247,6 +247,11 @@ void MainWindow::clearEntries()
     channelTableModel_->update();
 
     altitudeWidget_->clear();
+    altitudeWidget_->redraw();
+
+    pvtTableModel_->clearData();
+    pvtTableModel_->update();
+
     DOPWidget_->clear();
 
     clear_->setEnabled(false);

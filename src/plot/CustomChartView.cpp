@@ -86,7 +86,7 @@ void CustomChartView::updateCN0Chart(const QModelIndex &index)
     chart_->axes(Qt::Vertical).back()->setRange(25,55);
 }
 
-void CustomChartView::updateChart_noIndex(boost::circular_buffer<QPointF> buffer)
+void CustomChartView::updateChart_noIndex(const boost::circular_buffer<QPointF>& buffer)
 {
     if (!buffer.empty())
     {
@@ -115,6 +115,13 @@ void CustomChartView::updateChart_noIndex(boost::circular_buffer<QPointF> buffer
 
         chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
         chart_->axes(Qt::Vertical).back()->setRange(min_y, max_y);
+    }
+    else{
+        QVector<QPointF> empty_vector;
+        if (isPoint_)
+            scatterSeries_->replace(empty_vector);
+        else
+            lineSeries_->replace(empty_vector);
     }
 }
 

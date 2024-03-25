@@ -2,32 +2,6 @@
  * \file dop_widget.cpp
  * \brief Implementation of a widget that shows the dilution of precision
  * in a chart as reported by the receiver.
- *
- * \author Álvaro Cebrián Juan, 2019. acebrianjuan(at)gmail.com
- *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
  */
 
 
@@ -36,28 +10,25 @@
 #include <QGraphicsLayout>
 #include <QLayout>
 
-/*!
- Constructs a dillution of precision widget.
- */
 DOPWidget::DOPWidget(QWidget *parent) : QWidget(parent)
 {
     // Default buffer size.
-    m_bufferSize = 100;
+    bufferSize_ = BUFFER_SIZE_FOR_PVT;
 
-    m_gdopBuffer.resize(m_bufferSize);
-    m_gdopBuffer.clear();
+    gdopBuffer_.resize(bufferSize_);
+    gdopBuffer_.clear();
 
-    m_pdopBuffer.resize(m_bufferSize);
-    m_pdopBuffer.clear();
+    pdopBuffer_.resize(bufferSize_);
+    pdopBuffer_.clear();
 
-    m_hdopBuffer.resize(m_bufferSize);
-    m_hdopBuffer.clear();
+    hdopBuffer_.resize(bufferSize_);
+    hdopBuffer_.clear();
 
-    m_vdopBuffer.resize(m_bufferSize);
-    m_vdopBuffer.clear();
+    vdopBuffer_.resize(bufferSize_);
+    vdopBuffer_.clear();
 
-    m_gdopSeries = new QtCharts::QLineSeries();
-    m_gdopSeries->setName("GDOP");
+    gdopSeries_ = new QtCharts::QLineSeries();
+    gdopSeries_->setName("GDOP");
 
     m_pdopSeries = new QtCharts::QLineSeries();
     m_pdopSeries->setName("PDOP");
@@ -74,7 +45,7 @@ DOPWidget::DOPWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(m_chartView);
 
     QtCharts::QChart *chart = m_chartView->chart();
-    chart->addSeries(m_gdopSeries);
+    chart->addSeries(gdopSeries_);
     chart->addSeries(m_pdopSeries);
     chart->addSeries(m_hdopSeries);
     chart->addSeries(m_vdopSeries);
@@ -101,10 +72,10 @@ DOPWidget::DOPWidget(QWidget *parent) : QWidget(parent)
  */
 void DOPWidget::addData(qreal tow, qreal gdop, qreal pdop, qreal hdop, qreal vdop)
 {
-    m_gdopBuffer.push_back(QPointF(tow, gdop));
-    m_pdopBuffer.push_back(QPointF(tow, pdop));
-    m_hdopBuffer.push_back(QPointF(tow, hdop));
-    m_vdopBuffer.push_back(QPointF(tow, vdop));
+    gdopBuffer_.push_back(QPointF(tow, gdop));
+    pdopBuffer_.push_back(QPointF(tow, pdop));
+    hdopBuffer_.push_back(QPointF(tow, hdop));
+    vdopBuffer_.push_back(QPointF(tow, vdop));
 }
 
 /*!
@@ -112,10 +83,10 @@ void DOPWidget::addData(qreal tow, qreal gdop, qreal pdop, qreal hdop, qreal vdo
  */
 void DOPWidget::redraw()
 {
-    populateSeries(m_gdopBuffer, m_gdopSeries);
-    populateSeries(m_pdopBuffer, m_pdopSeries);
-    populateSeries(m_hdopBuffer, m_hdopSeries);
-    populateSeries(m_vdopBuffer, m_vdopSeries);
+    populateSeries(gdopBuffer_, gdopSeries_);
+    populateSeries(pdopBuffer_, m_pdopSeries);
+    populateSeries(hdopBuffer_, m_hdopSeries);
+    populateSeries(vdopBuffer_, m_vdopSeries);
 }
 
 /*!
@@ -123,12 +94,12 @@ void DOPWidget::redraw()
  */
 void DOPWidget::clear()
 {
-    m_gdopBuffer.clear();
-    m_pdopBuffer.clear();
-    m_hdopBuffer.clear();
-    m_vdopBuffer.clear();
+    gdopBuffer_.clear();
+    pdopBuffer_.clear();
+    hdopBuffer_.clear();
+    vdopBuffer_.clear();
 
-    m_gdopSeries->clear();
+    gdopSeries_->clear();
     m_pdopSeries->clear();
     m_hdopSeries->clear();
     m_vdopSeries->clear();
@@ -139,12 +110,12 @@ void DOPWidget::clear()
  */
 void DOPWidget::setBufferSize(size_t size)
 {
-    m_bufferSize = size;
+    bufferSize_ = size;
 
-    m_gdopBuffer.resize(m_bufferSize);
-    m_pdopBuffer.resize(m_bufferSize);
-    m_hdopBuffer.resize(m_bufferSize);
-    m_vdopBuffer.resize(m_bufferSize);
+    gdopBuffer_.resize(bufferSize_);
+    pdopBuffer_.resize(bufferSize_);
+    hdopBuffer_.resize(bufferSize_);
+    vdopBuffer_.resize(bufferSize_);
 }
 
 /*!
