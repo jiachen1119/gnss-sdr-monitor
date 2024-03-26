@@ -24,14 +24,14 @@ void SocketGnss::run()
         while (socketGnssSynchro_->hasPendingDatagrams())
         {
             QNetworkDatagram datagram = socketGnssSynchro_->receiveDatagram();
-            auto stocks = readGnssSynchro(datagram.data().data(), datagram.data().size());
-            emit sendData(stocks);
+            auto vector = readGnssSynchro(datagram.data().data(), datagram.data().size());
+            emit sendData(vector);
         }
     }
     socketGnssSynchro_->close();
 }
 
-gnss_sdr::Observables SocketGnss::readGnssSynchro(char *buff, int bytes)
+std::vector<ChannelStruct> SocketGnss::readGnssSynchro(char *buff, int bytes)
 {
     try
     {
@@ -40,9 +40,7 @@ gnss_sdr::Observables SocketGnss::readGnssSynchro(char *buff, int bytes)
         stocks.ParseFromString(std::string(buff,bytes));
 
         // 将stock解析为结构体
-        return stocks;
-
-
+        return parseStruct(stocks);
     }
     catch (std::exception &e)
     {
@@ -67,6 +65,7 @@ std::vector<ChannelStruct> SocketGnss::parseStruct(const gnss_sdr::Observables& 
     for (int i = 0; i < stocks.observable_size(); ++i)
     {
         const auto& obs = stocks.observable(i);
+        // Check if channel is valid, if not, do nothing.ob
         if (obs.fs() != 0){
             ChannelStruct i_struct{
                 obs.system(),obs.signal(),obs.prn(),obs.channel_id(),

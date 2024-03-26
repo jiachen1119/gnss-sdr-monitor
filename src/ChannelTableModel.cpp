@@ -8,13 +8,20 @@
  */
 ChannelTableModel::ChannelTableModel()
 {
-    mapSignalName_["1C"] = "L1 C/A";
-    mapSignalName_["1B"] = "E1";
-    mapSignalName_["1G"] = "L1 C/A";
-    mapSignalName_["2S"] = "L2C";
-    mapSignalName_["2G"] = "L2 C/A";
-    mapSignalName_["5X"] = "E5a";
+    mapSignalName_["1C"] = "L1 C/A"; // GPS L1 C/A 1575.42MHz
+    mapSignalName_["1G"] = "L1 C/A"; // Glonass L1 C/A 1602.00MHz
+    mapSignalName_["1B"] = "E1"; // Galileo E1 B/C 157542MHz
+    mapSignalName_["B1"] = "B1"; // Beidou B1I 1561.098MHz
+
+    mapSignalName_["2S"] = "L2C"; // GPS L2 L2CM 1227.60MHz
+    mapSignalName_["2G"] = "L2 C/A"; // Glonass L2 C/A 1246.00MHz
+    mapSignalName_["B3"] = "B3I"; // Beidou B3I 1268.520MHz
+
+    mapSignalName_["5X"] = "E5a"; // Galileo E5a 1176.450MHz
+    mapSignalName_["7X"] = "E5b"; // Galileo E5b 1207.140MHz
     mapSignalName_["L5"] = "L5";
+    mapSignalName_["E6"] = "E6b"; // Galileo E6B 1278.75MHz
+
 
     columns_ = 10;
     bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
@@ -62,7 +69,7 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
     {
         try{
             int channel_id = channelsId_.at(index.row());
-            gnss_sdr::GnssSynchro channel = channels_.at(channel_id);
+            auto channel = channels_.at(channel_id);
             // 通道所属的卫星系统：GPS/BDS/Galileo
             QString channel_signal = channelsSignal_.at(channel_id);
 
@@ -89,13 +96,13 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
                 switch (index.column())
                 {
                 case CHANNEL_ID:
-                    return channel.channel_id();
+                    return channel.channel_id;
                 case CHANNEL_SYSTEM:
                     return channel_signal;
                 case CHANNEL_PRN:
-                    return channel.prn();
+                    return channel.prn;
                 case CHANNEL_ACQ_DOPPLER:
-                    return channel.acq_doppler_hz();
+                    return channel.acq_doppler_hz;
                 case CHANNEL_CONSTELLATION:
                     return channel_prompt_iq;
                 case CHANNEL_CN0:
@@ -103,11 +110,11 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
                 case CHANNEL_DOPPLER:
                     return channel_doppler;
                 case CHANNEL_TOW:
-                    return channel.tow_at_current_symbol_ms();
+                    return channel.tow_at_current_symbol_ms;
                 case CHANNEL_TLM:
-                    return channel.flag_valid_word();
+                    return channel.flag_valid_word;
                 case CHANNEL_PSEUDORANGE:
-                    return QString::number(channel.pseudorange_m(),'f',3);
+                    return QString::number(channel.pseudorange_m,'f',3);
                 }
             }
             else if (role == Qt::ToolTipRole)
@@ -126,13 +133,13 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
             }
             else if (index.column() == CHANNEL_SYSTEM)
             {
-                if (channel.system() == "G")
+                if (channel.system == "G")
                     return QIcon(":/images/flag-us.png");
-                else if (channel.system() == "R")
+                else if (channel.system == "R")
                     return QIcon(":/images/flag-ru.png");
-                else if (channel.system() == "E")
+                else if (channel.system == "E")
                     return QIcon(":/images/flag-eu.png");
-                else if (channel.system() == "C")
+                else if (channel.system == "C")
                     return QIcon(":/images/flag-cn.png");
             }
         }
@@ -195,13 +202,14 @@ QVariant ChannelTableModel::headerData(int section,Qt::Orientation orientation,
  Populates the internal data structures of the table model with the data of the \a stocks collection of GnssSynchro objects.
  Internally, this function calls populateChannel() on each individual GnssSynchro object in the collection.
  */
-void ChannelTableModel::populateChannels(const gnss_sdr::Observables *stocks)
+void ChannelTableModel::populateChannels(const std::vector<ChannelStruct>& vector)
 {
     // 这里存在一个问题就是一次只发送一个channel的数据，并不是预想的所有通道
     // 通过observable全部发送过来
-    for (int i = 0; i < stocks->observable_size(); i++){
-        auto obs = stocks->observable(i);
-        populateChannel(&obs);
+    if (!vector.empty()){
+        for (const auto & i : vector){
+            populateChannel(i);
+        }
     }
 }
 
@@ -209,17 +217,14 @@ void ChannelTableModel::populateChannels(const gnss_sdr::Observables *stocks)
  Populates the internal data structures of the table model with the data of the \a ch GnssSynchro object.
  本函数仅处理一个通道的数据
  */
-void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
+void ChannelTableModel::populateChannel(const ChannelStruct& ch)
 {
-    // Check if channel is valid, if not, do nothing.
-    if (ch->fs() != 0)
-    {
-        int id =  ch->channel_id();
+        int id =  ch.channel_id;
         // Channel is valid, now check if it exists in the map of channels.
         if (channels_.find(id) != channels_.end())
         {
             // Channel exists, now check if its PRN is the same.
-            if (channels_.at(id).prn() != ch->prn()){
+            if (channels_.at(id).prn != ch.prn){
                 // PRN has changed so reset the channel.
                 clearChannel(id);
             }
@@ -229,7 +234,7 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
         size_t map_size = channels_.size();
 
         // update/add the new GnssSynchro object to the local channel.
-        channels_[id] = *ch;
+        channels_[id] = ch;
 
         // Time.
         if (channelsTime_.find(id) == channelsTime_.end()){
@@ -237,35 +242,35 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
             channelsTime_[id].resize(bufferSize_);
             channelsTime_[id].clear();
         }
-        channelsTime_[id].push_back(ch->rx_time());
+        channelsTime_[id].push_back(ch.rx_time);
 
         // In-phase prompt component.
         if (channelsI_.find(id) == channelsI_.end()){
             channelsI_[id].resize(bufferSize_);
             channelsI_[id].clear();
         }
-        channelsI_[id].push_back(ch->prompt_i());
+        channelsI_[id].push_back(ch.prompt_i);
 
         // Quadrature prompt component.
         if (channelsQ_.find(id) == channelsQ_.end()){
             channelsQ_[id].resize(bufferSize_);
             channelsQ_[id].clear();
         }
-        channelsQ_[id].push_back(ch->prompt_q());
+        channelsQ_[id].push_back(ch.prompt_q);
 
         // CN0.
         if (channelsCn0_.find(id) == channelsCn0_.end()){
             channelsCn0_[id].resize(bufferSize_);
             channelsCn0_[id].clear();
         }
-        channelsCn0_[id].push_back(ch->cn0_db_hz());
+        channelsCn0_[id].push_back(ch.cn0_db_hz);
 
         // Doppler.
         if (channelsDoppler_.find(id) == channelsDoppler_.end()){
             channelsDoppler_[id].resize(bufferSize_);
             channelsDoppler_[id].clear();
         }
-        channelsDoppler_[id].push_back(ch->carrier_doppler_hz());
+        channelsDoppler_[id].push_back(ch.carrier_doppler_hz);
 
         // Signal name.
         channelsSignal_[id] = getSignalPrettyName(ch);
@@ -276,7 +281,6 @@ void ChannelTableModel::populateChannel(const gnss_sdr::GnssSynchro *ch)
             // so record the new channel number in the vector of channel IDs.
             channelsId_.push_back(id);
         }
-    }
 }
 
 /*!
@@ -313,24 +317,25 @@ void ChannelTableModel::clearChannels()
 /*!
  Gets the descriptive string formed by the combination of the GNSS system and signal name for a given \a ch GnssSynchro object.
  */
-QString ChannelTableModel::getSignalPrettyName(const gnss_sdr::GnssSynchro *ch)
+QString ChannelTableModel::getSignalPrettyName(const ChannelStruct& ch)
 {
     QString system_name;
-    if (!ch->system().empty())
+    QString name = QString::fromStdString(ch.system);
+    if (!name.isEmpty())
     {
-        if (ch->system() == "G")
+        if (name == "G")
             system_name = QStringLiteral("GPS");
-        else if (ch->system() == "E")
+        else if (name == "E")
             system_name = QStringLiteral("Galileo");
-        else if (ch->system() == "C")
+        else if (name == "C")
             system_name = QStringLiteral("BeiDou");
-        else if (ch->system() == "R")
+        else if (name == "R")
             system_name = QStringLiteral("Glonass");
         else
             system_name = QVariant::Invalid;
 
-        if (mapSignalName_.find(ch->signal()) != mapSignalName_.end())
-            system_name.append(" ").append(mapSignalName_.at(ch->signal()));
+        if (mapSignalName_.find(ch.signal) != mapSignalName_.end())
+            system_name.append(" ").append(mapSignalName_.at(ch.signal));
     }
     return system_name;
 }

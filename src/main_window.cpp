@@ -19,7 +19,6 @@
 #include <QtNetwork/QHostAddress>
 #include <QtNetwork/QNetworkDatagram>
 #include <iostream>
-#include <sstream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -169,7 +168,7 @@ MainWindow::MainWindow(QWidget *parent)
     socketGnssSynchro_->start();
 
     // Connect Signals & Slots.
-    qRegisterMetaType<gnss_sdr::Observables>("gnss_sdr::Observables");
+    qRegisterMetaType<std::vector<ChannelStruct>>("std::vector<ChannelStruct>");
     connect(socketGnssSynchro_.get(), &SocketGnss::sendData, this, &MainWindow::receiveGnssSynchro);
     connect(qApp,&QApplication::aboutToQuit,socketGnssSynchro_.get(),&SocketGnss::stopThread);
 
@@ -210,12 +209,11 @@ void MainWindow::toggleCapture()
     }
 }
 
-void MainWindow::receiveGnssSynchro(gnss_sdr::Observables stocks)
+void MainWindow::receiveGnssSynchro(const std::vector<ChannelStruct>& vector)
 {
-    stocks_ =std::move(stocks);
     if (stop_->isEnabled())
     {
-        channelTableModel_->populateChannels(&stocks_);
+        channelTableModel_->populateChannels(vector);
         clear_->setEnabled(true);
     }
     if (!updateTimer_.isActive())

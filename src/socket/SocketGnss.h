@@ -17,14 +17,14 @@ class SocketGnss: public QThread
     Q_OBJECT
 public:
     explicit SocketGnss(QObject *parent= nullptr,quint16 port = 1234);
-    gnss_sdr::Observables readGnssSynchro(char buff[], int bytes);
+    std::vector<ChannelStruct> readGnssSynchro(char buff[], int bytes);
     void setPort(quint16 port);
 
 public slots:
     void stopThread();
 
 signals:
-    void sendData(gnss_sdr::Observables stocks);
+    void sendData(std::vector<ChannelStruct> vector);
 
 protected:
     void run() override;

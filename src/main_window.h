@@ -18,7 +18,6 @@
 #include "PVTTableModel.h"
 #include "SocketGnss.h"
 #include "dop_widget.h"
-#include "gnss_synchro.pb.h"
 #include "monitor_pvt.pb.h"
 #include "monitor_pvt_wrapper.h"
 #include "styles/TabBarStyle.h"
@@ -53,7 +52,7 @@ public:
 
 public slots:
     void toggleCapture();
-    void receiveGnssSynchro(gnss_sdr::Observables stocks);
+    void receiveGnssSynchro(const std::vector<ChannelStruct>& vector);
     void receiveMonitorPvt();
     void clearEntries();
     void quit();
@@ -87,7 +86,6 @@ private:
 
     std::unique_ptr<SocketGnss> socketGnssSynchro_;
     QUdpSocket *socketMonitorPvt_;
-    gnss_sdr::Observables stocks_;
     MonitorPvtWrapper *monitorPvtWrapper_;
     gnss_sdr::MonitorPvt monitorPvt_;
     std::vector<int> m_channels;

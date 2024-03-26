@@ -9,6 +9,7 @@
 #define GNSS_SDR_MONITOR_CHANNEL_TABLE_MODEL_H_
 
 #include "gnss_synchro.pb.h"
+#include "ChannelStruct.h"
 #include <boost/circular_buffer.hpp>
 #include <QAbstractTableModel>
 #include <QTimer>
@@ -25,15 +26,15 @@ public:
     // update the print
     void update();
 
-    void populateChannels(const gnss_sdr::Observables *m_stocks);
-    void populateChannel(const gnss_sdr::GnssSynchro *ch);
+    void populateChannels(const std::vector<ChannelStruct>& vector);
+    void populateChannel(const ChannelStruct& ch);
     void clearChannel(int ch_id);
     void clearChannels();
 
     // 检查通道是否存在失锁退出的情况
     void checkChannels();
 
-    QString getSignalPrettyName(const gnss_sdr::GnssSynchro *ch);
+    QString getSignalPrettyName(const ChannelStruct& ch);
     int getColumns() const;
     void setBufferSize();
     int getChannelId(int row);
@@ -56,7 +57,7 @@ protected:
     std::map<int,double> checkNum_;
 
     std::vector<int> channelsId_;
-    std::map<int, gnss_sdr::GnssSynchro> channels_;
+    std::map<int, ChannelStruct> channels_;
     std::map<int, QString> channelsSignal_;
     std::map<int, boost::circular_buffer<double>> channelsTime_;
     std::map<int, boost::circular_buffer<double>> channelsI_;
