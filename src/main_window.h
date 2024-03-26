@@ -17,8 +17,8 @@
 #include "CustomTableView.h"
 #include "PVTTableModel.h"
 #include "SocketGnss.h"
+#include "SocketPVT.h"
 #include "dop_widget.h"
-#include "monitor_pvt.pb.h"
 #include "monitor_pvt_wrapper.h"
 #include "styles/TabBarStyle.h"
 #include "telecommand_widget.h"
@@ -46,14 +46,13 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-    gnss_sdr::MonitorPvt readMonitorPvt(char buff[], int bytes);
     void saveSettings();
     void loadSettings();
 
 public slots:
     void toggleCapture();
     void receiveGnssSynchro(const std::vector<ChannelStruct>& vector);
-    void receiveMonitorPvt();
+    void receiveMonitorPvt(PVTStruct in);
     void clearEntries();
     void quit();
     void showPreferences();
@@ -85,9 +84,8 @@ private:
     PVTTableModel *pvtTableModel_;
 
     std::unique_ptr<SocketGnss> socketGnssSynchro_;
-    QUdpSocket *socketMonitorPvt_;
+    std::unique_ptr<SocketPVT> socketMonitorPvt_;
     MonitorPvtWrapper *monitorPvtWrapper_;
-    gnss_sdr::MonitorPvt monitorPvt_;
     std::vector<int> m_channels;
     quint16 m_portGnssSynchro;
     quint16 m_portMonitorPvt;

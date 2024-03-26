@@ -164,16 +164,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Sockets.
     socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1234);
-    socketMonitorPvt_ = new QUdpSocket(this);
+    socketMonitorPvt_ = std::make_unique<SocketPVT>(nullptr, 1111);
     socketGnssSynchro_->start();
+    socketMonitorPvt_->start();
 
     // Connect Signals & Slots.
     qRegisterMetaType<std::vector<ChannelStruct>>("std::vector<ChannelStruct>");
     connect(socketGnssSynchro_.get(), &SocketGnss::sendData, this, &MainWindow::receiveGnssSynchro);
     connect(qApp,&QApplication::aboutToQuit,socketGnssSynchro_.get(),&SocketGnss::stopThread);
 
-    connect(socketMonitorPvt_, &QUdpSocket::readyRead, this, &MainWindow::receiveMonitorPvt);
-    connect(qApp, &QApplication::aboutToQuit, this, &MainWindow::quit);
+    qRegisterMetaType<PVTStruct>("PVTStruct");
+    connect(socketMonitorPvt_.get(), &SocketPVT::sendData, this, &MainWindow::receiveMonitorPvt);
+    connect(qApp, &QApplication::aboutToQuit, socketMonitorPvt_.get(), &SocketPVT::stopThread);
 
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
     connect(ui->tableView, &QTableView::doubleClicked, this, &MainWindow::expandPlot);
@@ -222,20 +224,13 @@ void MainWindow::receiveGnssSynchro(const std::vector<ChannelStruct>& vector)
     }
 }
 
-void MainWindow::receiveMonitorPvt()
+void MainWindow::receiveMonitorPvt(PVTStruct in)
 {
     // 当有消息待处理
-    while (socketMonitorPvt_->hasPendingDatagrams())
+    if (stop_->isEnabled())
     {
-        QNetworkDatagram datagram = socketMonitorPvt_->receiveDatagram();
-        monitorPvt_ = readMonitorPvt(datagram.data().data(), datagram.data().size());
-
-        if (stop_->isEnabled())
-        {
-            auto pvtStruct = pvtTableModel_->populatePVT(monitorPvt_);
-            monitorPvtWrapper_->addMonitorPvt(pvtStruct);
-            // clear->setEnabled(true);
-        }
+        pvtTableModel_->populatePVT(in);
+        monitorPvtWrapper_->addMonitorPvt(in);
     }
 }
 
@@ -256,21 +251,6 @@ void MainWindow::clearEntries()
 }
 
 void MainWindow::quit() { saveSettings(); }
-
-gnss_sdr::MonitorPvt MainWindow::readMonitorPvt(char buff[], int bytes)
-{
-    try
-    {
-        std::string data(buff, bytes);
-        monitorPvt_.ParseFromString(data);
-    }
-    catch (std::exception &e)
-    {
-        qDebug() << e.what();
-    }
-
-    return monitorPvt_;
-}
 
 void MainWindow::saveSettings()
 {
@@ -330,7 +310,7 @@ void MainWindow::setPort()
     settings.endGroup();
 
     socketGnssSynchro_->setPort(m_portGnssSynchro);
-    socketMonitorPvt_->bind(QHostAddress::Any, m_portMonitorPvt);
+    socketMonitorPvt_->setPort(m_portMonitorPvt);
 }
 
 void MainWindow::expandPlot(const QModelIndex &index)

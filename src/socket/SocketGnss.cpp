@@ -11,24 +11,24 @@ SocketGnss::SocketGnss(QObject *parent,quint16 port): QThread(parent)
 
 void SocketGnss::run()
 {
-    QSharedPointer<QUdpSocket> socketGnssSynchro_ = QSharedPointer<QUdpSocket>(new QUdpSocket());
-    socketGnssSynchro_->abort();
+    QSharedPointer<QUdpSocket> socketGnssSynchro = QSharedPointer<QUdpSocket>(new QUdpSocket());
+    socketGnssSynchro->abort();
     // 必须要加上延时环节
     QThread::msleep(500);
-    if (!socketGnssSynchro_->bind(QHostAddress::LocalHost, port_)) {
+    if (!socketGnssSynchro->bind(QHostAddress::LocalHost, port_)) {
         qDebug() << "Failed to bind UDP socket to port " << port_;
         return;
     }
 
-    while (socketGnssSynchro_->state() == QAbstractSocket::BoundState&&!threadStop_){
-        while (socketGnssSynchro_->hasPendingDatagrams())
+    while (socketGnssSynchro->state() == QAbstractSocket::BoundState&&!threadStop_){
+        while (socketGnssSynchro->hasPendingDatagrams())
         {
-            QNetworkDatagram datagram = socketGnssSynchro_->receiveDatagram();
+            QNetworkDatagram datagram = socketGnssSynchro->receiveDatagram();
             auto vector = readGnssSynchro(datagram.data().data(), datagram.data().size());
             emit sendData(vector);
         }
     }
-    socketGnssSynchro_->close();
+    socketGnssSynchro->close();
 }
 
 std::vector<ChannelStruct> SocketGnss::readGnssSynchro(char *buff, int bytes)

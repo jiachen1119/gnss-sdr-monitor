@@ -61,6 +61,7 @@ aux_source_directory(. SRC_SOURCE)
 set(SOURCES
         ${SRC_SOURCE}
         socket/SocketGnss.cpp
+        socket/SocketPVT.cpp
         PVT/PVTTableModel.cpp
         ${PROTO_SRCS}
         ${PROTO_SRCS2}

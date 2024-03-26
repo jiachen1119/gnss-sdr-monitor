@@ -1,5 +1,6 @@
-set(SOCKET_SOURCE SocketGnss.cpp SocketGnss.h)
-add_library(SOCKET ${SOCKET_SOURCE})
+set(SOCKET_SOURCES SocketGnss.cpp SocketPVT.cpp)
+set(SOCKET_HEADERS SocketGnss.h SocketPVT.h)
+add_library(SOCKET ${SOCKET_SOURCES} ${SOCKET_HEADERS})
 
 include_directories()
 set(QT5_LIBRARIES

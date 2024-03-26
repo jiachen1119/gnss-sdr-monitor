@@ -109,26 +109,6 @@ int PVTTableModel::columnCount(const QModelIndex &parent) const
     return 1;
 }
 
-PVTStruct PVTTableModel::populatePVT(const gnss_sdr::MonitorPvt &in)
-{
-    PVTStruct output{
-        in.tow_at_current_symbol_ms(),
-        in.week(),
-        in.rx_time(),
-        in.user_clk_offset(),
-        in.pos_x(),in.pos_y(),in.pos_z(),
-        in.vel_x(),in.vel_y(),in.vel_z(),
-        in.cov_xx(),in.cov_yy(),in.cov_zz(),
-        in.cov_xy(),in.cov_yz(),in.cov_zx(),
-        in.latitude(),in.longitude(),in.height(),
-        in.valid_sats(),in.solution_status(),in.solution_type(),
-        in.ar_ratio_factor(),in.ar_ratio_threshold(),
-        in.gdop(),in.pdop(),in.hdop(),in.vdop()
-    };
-    pvtStruct_ = output;
-    return output;
-}
-
 void PVTTableModel::update()
 {
     beginResetModel();
@@ -138,4 +118,9 @@ void PVTTableModel::update()
 void PVTTableModel::clearData()
 {
     pvtStruct_={};
+}
+
+void PVTTableModel::populatePVT(const PVTStruct &in)
+{
+    pvtStruct_ = in;
 }
