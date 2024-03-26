@@ -12,7 +12,7 @@ Besides, it was forked from *acebrianjuan* by me, and I optimized in some parts:
 - ready to alarm the safety of pseudorange
 
 ![UI](./screenshots/gnss-sdr-monitor.png)
-![UI](./screenshots/gnss-sdr-monitor2.png)
+![UI](./screenshots/monitor2.png)
 
 <table style="width:100%">
   <tr>
