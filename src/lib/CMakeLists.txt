@@ -1,5 +1,6 @@
-set(LIB_SOURCE PVTStruct.h Variance.h CustomChannelView.cpp CustomTableView.cpp)
-add_library(LIB ${LIB_SOURCE})
+set(LIB_SOURCES CustomChannelView.cpp CustomTableView.cpp)
+set(LIB_HEADERS Variance.h PVTStruct.h ChannelStruct.h CustomChannelView.h CustomTableView.h)
+add_library(lib ${LIB_SOURCES} ${LIB_HEADERS})
 
 set(QT5_LIBRARIES
         Qt5::Core
@@ -8,4 +9,5 @@ set(QT5_LIBRARIES
         Qt5::PrintSupport
         Qt5::Charts
 )
-target_link_libraries(LIB PUBLIC ${QT5_LIBRARIES})
+
+target_link_libraries(lib PUBLIC ${QT5_LIBRARIES})

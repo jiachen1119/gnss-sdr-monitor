@@ -15,7 +15,7 @@ class SocketGnss: public QThread
 {
     Q_OBJECT
 public:
-    explicit SocketGnss(QObject *parent= nullptr,quint16 port = 1111);
+    explicit SocketGnss(QObject *parent= nullptr,quint16 port = 1234);
     void readGnssSynchro(char buff[], int bytes);
     void setPort(quint16 port);
 

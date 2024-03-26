@@ -164,7 +164,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableView->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
 
     // Sockets.
-    socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1111);
+    socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1234);
     socketMonitorPvt_ = new QUdpSocket(this);
     socketGnssSynchro_->start();
 
@@ -327,8 +327,8 @@ void MainWindow::setPort()
 {
     QSettings settings;
     settings.beginGroup("Preferences_Dialog");
-    m_portGnssSynchro = settings.value("port_gnss_synchro", 1111).toInt();
-    m_portMonitorPvt = settings.value("port_monitor_pvt", 1112).toInt();
+    m_portGnssSynchro = settings.value("port_gnss_synchro", 1234).toInt();
+    m_portMonitorPvt = settings.value("port_monitor_pvt", 1111).toInt();
     settings.endGroup();
 
     socketGnssSynchro_->setPort(m_portGnssSynchro);

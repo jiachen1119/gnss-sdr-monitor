@@ -1,4 +1,4 @@
-/*!
+/*!combine the altitude part into customChartView
  * \file altitude_widget.cpp
  * \brief Implementation of a widget that shows the altitude in a chart as
  * reported by the receiver.

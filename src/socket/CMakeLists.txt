@@ -10,4 +10,4 @@ set(QT5_LIBRARIES
         Qt5::Network
 )
 
-target_link_libraries(SOCKET PUBLIC ${QT5_LIBRARIES})
+target_link_libraries(socket PUBLIC ${QT5_LIBRARIES})

@@ -6,7 +6,6 @@
 #define GNSS_SDR_MONITOR_PVTSTRUCT_H
 
 #include <QVariant>
-#include "monitor_pvt.pb.h"
 
 typedef struct PVTStruct {
     uint32_t tow;
