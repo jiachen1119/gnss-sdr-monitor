@@ -7,10 +7,10 @@
  */
 
 #include "main_window.h"
-#include "cn0_delegate.h"
-#include "constellation_delegate.h"
-#include "doppler_delegate.h"
-#include "led_delegate.h"
+#include "Cn0Delegate.h"
+#include "ConstellationDelegate.h"
+#include "DopplerDelegate.h"
+#include "LedDelegate.h"
 #include "preferences_dialog.h"
 #include "ui_main_window.h"
 #include <QDebug>
@@ -23,8 +23,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-//    this->setStyleSheet("background-color: #111111;");
-
     // 获取屏幕尺寸，为后续expandPlot做准备
     QScreen *screen=QGuiApplication::primaryScreen();
     QRect size=screen->availableGeometry();
@@ -39,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // UI设置
     ui->setupUi(this);
-    this->setWindowTitle(QStringLiteral("GNSS SDR 上位机 designed by SEU Tang"));
+    this->setWindowTitle(QStringLiteral("GNSS SDR Monitor designed by SEU Tang"));
 
     // Tab Bar设置
     tabBarSetting();

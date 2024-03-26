@@ -11,10 +11,10 @@ public:
 
 protected:
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-        const QModelIndex &index) const;
+        const QModelIndex &index) const override;
 
     QSize sizeHint(const QStyleOptionViewItem &option,
-        const QModelIndex &index) const;
+        const QModelIndex &index) const override;
 };
 
 #endif  // GNSS_SDR_MONITOR_CONSTELLATION_DELEGATE_H_

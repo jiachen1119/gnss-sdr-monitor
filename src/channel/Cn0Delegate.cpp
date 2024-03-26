@@ -2,36 +2,11 @@
  * \file cn0_delegate.cpp
  * \brief Implementation of a delegate that draws a CN0 vs. time graph on
  * the view using the information from the model.
- *
- * \author Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com
- *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
  */
 
 
-#include "cn0_delegate.h"
+#include "Cn0Delegate.h"
+#include "Variance.h"
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
@@ -42,18 +17,14 @@
 Cn0Delegate::Cn0Delegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
     // Default buffer size.
-    m_bufferSize = 100;
+    bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
 
     // Default CN0 range.
-    m_minCn0 = 20;
-    m_maxCn0 = 50;
+    minCn0_ = 20;
+    maxCn0_ = 55;
 
     // Default state of auto range function.
-    m_autoRangeEnabled = false;
-}
-
-Cn0Delegate::~Cn0Delegate()
-{
+    autoRangeEnabled_ = false;
 }
 
 /*!
@@ -61,7 +32,7 @@ Cn0Delegate::~Cn0Delegate()
  */
 void Cn0Delegate::setBufferSize(size_t size)
 {
-    m_bufferSize = size;
+    bufferSize_ = size;
 }
 
 /*!
@@ -71,8 +42,8 @@ void Cn0Delegate::setCn0Range(double min, double max)
 {
     if (min < max)
     {
-        m_minCn0 = min;
-        m_maxCn0 = max;
+        minCn0_ = min;
+        maxCn0_ = max;
     }
 }
 
@@ -81,7 +52,7 @@ void Cn0Delegate::setCn0Range(double min, double max)
  */
 void Cn0Delegate::setAutoRangeEnabled(bool enabled)
 {
-    m_autoRangeEnabled = enabled;
+    autoRangeEnabled_ = enabled;
 }
 
 void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -92,20 +63,20 @@ void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     QVector<QPointF> points;
     QVector<double> x_data, y_data;
     QList<QVariant> var = index.data(Qt::DisplayRole).toList();
-    for (int i = 0; i < var.size(); i++)
+    for (const auto & i : var)
     {
-        points << var.at(i).toPointF();
-        x_data << var.at(i).toPointF().x();
-        y_data << var.at(i).toPointF().y();
+        points << i.toPointF();
+        x_data << i.toPointF().x();
+        y_data << i.toPointF().y();
     }
 
     double min_x = std::numeric_limits<double>::max();
     double max_x = -std::numeric_limits<double>::max();
 
-    double min_y = m_minCn0;
-    double max_y = m_maxCn0;
+    double min_y = minCn0_;
+    double max_y = maxCn0_;
 
-    if (m_autoRangeEnabled)
+    if (autoRangeEnabled_)
     {
         min_y = std::numeric_limits<double>::max();
         max_y = -std::numeric_limits<double>::max();
@@ -144,13 +115,13 @@ void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     QVector<QPointF> fpoints;
     QStyledItemDelegate::paint(painter, option, index);
 
-    if (points.isEmpty() || m_bufferSize < 1.0 || contentHeight <= 0)
+    if (points.isEmpty() || bufferSize_ < 1.0 || contentHeight <= 0)
     {
         return;
     }
 
     // Remove first points until the number of elements is within the designated buffer size.
-    while (points.length() > m_bufferSize)
+    while (points.length() > bufferSize_)
     {
         points.removeFirst();
     }
@@ -169,7 +140,7 @@ void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         }
 
         // Find the min and max values of the CN0 data (vertical axis) if auto range is enabled.
-        if (m_autoRangeEnabled)
+        if (autoRangeEnabled_)
         {
             if (val.y() < min_y)
             {
@@ -192,9 +163,9 @@ void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         double x_out = 0;
         double y_out = 0;
 
-        if (!m_autoRangeEnabled)
+        if (!autoRangeEnabled_)
         {
-            if (y_in > m_maxCn0)
+            if (y_in > maxCn0_)
             {
                 // Value is out of scale!
                 outOfScale = true;
@@ -291,7 +262,7 @@ void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     double lastCN0 = var.last().toPointF().y();
 
     // If the value of the last CN0 sample is outside of the designated scale use red color otherwise use black.
-    if (lastCN0 < m_minCn0 || lastCN0 > m_maxCn0)
+    if (lastCN0 < minCn0_ || lastCN0 > maxCn0_)
     {
         painter->setPen(Qt::red);
     }
@@ -312,7 +283,7 @@ void Cn0Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 QSize Cn0Delegate::sizeHint(const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
-    return QSize(option.fontMetrics.height() * SPARKLINE_MIN_EM_WIDTH, QStyledItemDelegate::sizeHint(option, index).height());
+    return {option.fontMetrics.height() * SPARKLINE_MIN_EM_WIDTH, QStyledItemDelegate::sizeHint(option, index).height()};
 }
 
 /*!

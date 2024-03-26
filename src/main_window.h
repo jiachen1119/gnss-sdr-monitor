@@ -20,7 +20,7 @@
 #include "SocketPVT.h"
 #include "dop_widget.h"
 #include "monitor_pvt_wrapper.h"
-#include "styles/TabBarStyle.h"
+#include "TabBarStyle.h"
 #include "telecommand_widget.h"
 #include <QAbstractTableModel>
 #include <QChart>
@@ -96,8 +96,6 @@ private:
     QAction *stop_;
     QAction *clear_;
     QAction *closePlotsAction_;
-
-    int bufferSize_;
 
     std::map<int, CustomChartView *> plotsConstellation_;
     std::map<int, CustomChartView *> plotsCn0_;

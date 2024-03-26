@@ -1,4 +1,4 @@
-#include "constellation_delegate.h"
+#include "ConstellationDelegate.h"
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
@@ -17,11 +17,11 @@ void ConstellationDelegate::paint(QPainter *painter,
     QList<QPointF> points;
     QVector<double> x_data, y_data;
     QList<QVariant> var = index.data(Qt::DisplayRole).toList();
-    for (int i = 0; i < var.size(); i++)
+    for (const auto & i : var)
     {
-        points << var.at(i).toPointF();
-        x_data << var.at(i).toPointF().x();
-        y_data << var.at(i).toPointF().y();
+        points << i.toPointF();
+        x_data << i.toPointF().x();
+        y_data << i.toPointF().y();
     }
 
 
@@ -153,5 +153,5 @@ void ConstellationDelegate::paint(QPainter *painter,
 QSize ConstellationDelegate::sizeHint(const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
-    return QSize(option.fontMetrics.height() * SPARKLINE_MIN_EM_WIDTH, QStyledItemDelegate::sizeHint(option, index).height());
+    return {option.fontMetrics.height() * SPARKLINE_MIN_EM_WIDTH, QStyledItemDelegate::sizeHint(option, index).height()};
 }

@@ -3,35 +3,10 @@
  * \brief Implementation of a delegate that draws a Doppler vs. time graph on
  * the view using the information from the model.
  *
- * \author Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com
- *
- * -----------------------------------------------------------------------
- *
- * Copyright (C) 2010-2019  (see AUTHORS file for a list of contributors)
- *
- * GNSS-SDR is a software defined Global Navigation
- *      Satellite Systems receiver
- *
- * This file is part of GNSS-SDR.
- *
- * GNSS-SDR is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * GNSS-SDR is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GNSS-SDR. If not, see <https://www.gnu.org/licenses/>.
- *
- * -----------------------------------------------------------------------
  */
 
-
-#include "doppler_delegate.h"
+#include "DopplerDelegate.h"
+#include "Variance.h"
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
@@ -42,16 +17,13 @@
 DopplerDelegate::DopplerDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
     // Default buffer size.
-    m_bufferSize = 100;
+    bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
 }
 
-DopplerDelegate::~DopplerDelegate()
-{
-}
 
 void DopplerDelegate::setBufferSize(int size)
 {
-    m_bufferSize = size;
+    bufferSize_ = size;
 }
 
 void DopplerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -60,11 +32,11 @@ void DopplerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
     QList<QPointF> points;
     QVector<double> x_data, y_data;
     QList<QVariant> var = index.data(Qt::DisplayRole).toList();
-    for (int i = 0; i < var.size(); i++)
+    for (const auto & i : var)
     {
-        points << var.at(i).toPointF();
-        x_data << var.at(i).toPointF().x();
-        y_data << var.at(i).toPointF().y();
+        points << i.toPointF();
+        x_data << i.toPointF().x();
+        y_data << i.toPointF().y();
     }
 
     double min_x = std::numeric_limits<double>::max();
@@ -106,12 +78,12 @@ void DopplerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
     QVector<QPointF> fpoints;
     QStyledItemDelegate::paint(painter, option, index);
 
-    if (points.isEmpty() || m_bufferSize < 1.0 || contentHeight <= 0)
+    if (points.isEmpty() || bufferSize_ < 1.0 || contentHeight <= 0)
     {
         return;
     }
 
-    while (points.length() > m_bufferSize)
+    while (points.length() > bufferSize_)
     {
         points.removeFirst();
     }
@@ -218,7 +190,7 @@ void DopplerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 QSize DopplerDelegate::sizeHint(const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
-    return QSize(option.fontMetrics.height() * SPARKLINE_MIN_EM_WIDTH, QStyledItemDelegate::sizeHint(option, index).height());
+    return {option.fontMetrics.height() * SPARKLINE_MIN_EM_WIDTH, QStyledItemDelegate::sizeHint(option, index).height()};
 }
 
 /*!

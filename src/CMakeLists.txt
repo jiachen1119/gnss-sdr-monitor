@@ -11,15 +11,6 @@ if(${Protobuf_VERSION} VERSION_LESS "3.0.0")
      message(FATAL_ERROR "Fatal error: Protocol Buffers > v3.0.0 required.")
 endif()
 
-# generate the header file needed and set auto skip generation on
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_SOURCE_DIR}/src/protobuf/gnss_synchro.proto)
-set_property(SOURCE ${PROTO_SRCS} PROPERTY SKIP_AUTOGEN ON)
-set_property(SOURCE ${PROTO_HDRS} PROPERTY SKIP_AUTOGEN ON)
-
-protobuf_generate_cpp(PROTO_SRCS2 PROTO_HDRS2 ${CMAKE_SOURCE_DIR}/src/protobuf/monitor_pvt.proto)
-set_property(SOURCE ${PROTO_SRCS2} PROPERTY SKIP_AUTOGEN ON)
-set_property(SOURCE ${PROTO_HDRS2} PROPERTY SKIP_AUTOGEN ON)
-
 # find qt library
 find_package(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Quick QuickWidgets Positioning Charts REQUIRED)
 if(NOT Qt5_FOUND)
@@ -49,23 +40,17 @@ set(QT5_LIBRARIES
 
 set(TARGET ${CMAKE_PROJECT_NAME})
 
-include_directories(lib PVT socket styles plot)
+include_directories(lib PVT socket styles plot channel)
 
 # 一定不能写多个，如果是add_subdirectory(lib PVT)也就意味着在PVT文件夹生成lib.a的库文件了，PVT的库无法生成
 add_subdirectory(lib)
 add_subdirectory(styles)
 add_subdirectory(plot)
+add_subdirectory(socket)
+add_subdirectory(PVT)
+add_subdirectory(channel)
 
 aux_source_directory(. SRC_SOURCE)
-
-set(SOURCES
-        ${SRC_SOURCE}
-        socket/SocketGnss.cpp
-        socket/SocketPVT.cpp
-        PVT/PVTTableModel.cpp
-        ${PROTO_SRCS}
-        ${PROTO_SRCS2}
-)
 
 set(UI_SOURCES
     main_window.ui
@@ -75,8 +60,8 @@ set(UI_SOURCES
 
 set(RESOURCES resources.qrc)
 
-add_executable(${TARGET} ${SOURCES} ${UI_SOURCES} ${RESOURCES})
+add_executable(${TARGET} ${SRC_SOURCE} ${UI_SOURCES} ${RESOURCES})
 
-target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost protobuf::libprotobuf lib styles plot)
+target_link_libraries(${TARGET} PUBLIC ${QT5_LIBRARIES} Boost::boost lib styles plot socket pvt channel)
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

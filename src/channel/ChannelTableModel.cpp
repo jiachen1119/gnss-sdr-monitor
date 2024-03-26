@@ -121,10 +121,10 @@ QVariant ChannelTableModel::data(const QModelIndex &index, int role) const
             {
                 switch (index.column())
                 {
-                case 5:
+                case CHANNEL_CN0:
                     return cn0_cbuf.back();
 
-                case 6:
+                case CHANNEL_DOPPLER:
                     return doppler_cbuf.back();
 
                 default:

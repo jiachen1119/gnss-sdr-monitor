@@ -8,7 +8,6 @@
 #ifndef GNSS_SDR_MONITOR_CHANNEL_TABLE_MODEL_H_
 #define GNSS_SDR_MONITOR_CHANNEL_TABLE_MODEL_H_
 
-#include "gnss_synchro.pb.h"
 #include "ChannelStruct.h"
 #include <boost/circular_buffer.hpp>
 #include <QAbstractTableModel>
@@ -45,13 +44,10 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-public slots:
-    gnss_sdr::GnssSynchro getChannelData(int key);
 
 protected:
     int columns_;
     int bufferSize_;
-    gnss_sdr::Observables m_stocks;
 
     QTimer checkTimer_;
     std::map<int,double> checkNum_;

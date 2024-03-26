@@ -46,6 +46,8 @@ std::vector<ChannelStruct> SocketGnss::readGnssSynchro(char *buff, int bytes)
     {
         qDebug() << e.what();
     }
+    std::vector<ChannelStruct> nullStruct;
+    return nullStruct;
 }
 
 void SocketGnss::setPort(quint16 port)

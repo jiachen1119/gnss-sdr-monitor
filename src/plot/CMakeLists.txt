@@ -1,5 +1,6 @@
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PLOT_SOURCE)
-add_library(plot ${PLOT_SOURCE})
+set(PLOT_SOURCES CustomChartView.cpp)
+set(PLOT_HEADERS CustomChartView.h)
+add_library(plot ${PLOT_SOURCES} ${PLOT_HEADERS})
 
 set(QT5_LIBRARIES
         Qt5::Core

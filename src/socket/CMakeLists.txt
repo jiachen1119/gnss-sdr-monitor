@@ -1,8 +1,18 @@
-set(SOCKET_SOURCES SocketGnss.cpp SocketPVT.cpp)
-set(SOCKET_HEADERS SocketGnss.h SocketPVT.h)
-add_library(SOCKET ${SOCKET_SOURCES} ${SOCKET_HEADERS})
+# generate the header file needed and set auto skip generation on
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_SOURCE_DIR}/src/protobuf/gnss_synchro.proto)
+set_property(SOURCE ${PROTO_SRCS} PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE ${PROTO_HDRS} PROPERTY SKIP_AUTOGEN ON)
 
-include_directories()
+protobuf_generate_cpp(PROTO_SRCS2 PROTO_HDRS2 ${CMAKE_SOURCE_DIR}/src/protobuf/monitor_pvt.proto)
+set_property(SOURCE ${PROTO_SRCS2} PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE ${PROTO_HDRS2} PROPERTY SKIP_AUTOGEN ON)
+
+set(SOCKET_SOURCES SocketGnss.cpp SocketPVT.cpp)
+set(SOCKET_HEADERS SocketGnss.h SocketPVT.h ${PROTO_SRCS} ${PROTO_SRCS2})
+
+add_library(socket ${SOCKET_SOURCES} ${SOCKET_HEADERS})
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set(QT5_LIBRARIES
         Qt5::Core
         Qt5::Gui
@@ -11,4 +21,4 @@ set(QT5_LIBRARIES
         Qt5::Network
 )
 
-target_link_libraries(socket PUBLIC ${QT5_LIBRARIES})
+target_link_libraries(socket PUBLIC ${QT5_LIBRARIES} protobuf::libprotobuf)

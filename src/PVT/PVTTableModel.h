@@ -9,7 +9,6 @@
 #include <QList>
 #include <QVariant>
 #include <qdebug.h>
-#include "monitor_pvt.pb.h"
 #include "PVTStruct.h"
 #include <QFont>
 

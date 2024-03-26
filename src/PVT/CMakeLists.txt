@@ -1,7 +1,6 @@
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} PVT_SOURCE)
-add_library(PVT_LIB ${PVT_SOURCE})
-
-include_directories(${CMAKE_BINARY_DIR}/src)
+set(PVT_SOURCES PVTTableModel.cpp CustomTableView.cpp)
+set(PVT_HEADERS PVTTableModel.h CustomTableView.h)
+add_library(pvt ${PVT_SOURCES} ${PVT_HEADERS})
 
 set(QT5_LIBRARIES
         Qt5::Core
@@ -10,4 +9,4 @@ set(QT5_LIBRARIES
         Qt5::PrintSupport
         Qt5::Charts
 )
-target_link_libraries(PVT_LIB PUBLIC ${QT5_LIBRARIES})
+target_link_libraries(pvt PUBLIC ${QT5_LIBRARIES})

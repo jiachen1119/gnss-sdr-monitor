@@ -2,7 +2,7 @@
  * \file main.cpp
  * \brief Main file of the gnss-sdr-monitor program.
  *
- * \author Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com
+ * \authors Álvaro Cebrián Juan, 2018. acebrianjuan(at)gmail.com; Kepeng Luan, 2023. kxn1119(at)gmail.com
  *
  * -----------------------------------------------------------------------
  *

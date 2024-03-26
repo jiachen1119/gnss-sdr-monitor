@@ -5,7 +5,8 @@
 #ifndef GNSS_SDR_MONITOR_CHANNELSTRUCT_H
 #define GNSS_SDR_MONITOR_CHANNELSTRUCT_H
 
-#include <QVariant>
+#include <string>
+
 using std::string;
 typedef uint64_t uint64;
 typedef uint32_t uint32;

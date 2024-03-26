@@ -5,8 +5,6 @@
 #ifndef GNSS_SDR_MONITOR_PVTSTRUCT_H
 #define GNSS_SDR_MONITOR_PVTSTRUCT_H
 
-#include <QVariant>
-
 typedef struct PVTStruct {
     uint32_t tow;
     uint32_t week;

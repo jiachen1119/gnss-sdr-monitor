@@ -6,8 +6,8 @@ QSize TabBarStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
     QSize s = QProxyStyle::sizeFromContents(type, option, size, widget);
     if (type == QStyle::CT_TabBarTab) {
         s.transpose();
-        s.rwidth() = 80; // 设置每个tabBar中item的大小 rwidth是可以修改的
-        s.rheight() = 70 + 8 + 5;
+        s.rwidth() = 70 + 15 + 15; // 设置每个tabBar中item的大小 rwidth是可以修改的
+        s.rheight() = 90 + 15 + 10 + 5;
     }
     return s;
 }
@@ -30,7 +30,7 @@ void TabBarStyle::drawControl(ControlElement element, const QStyleOption *option
                 painter->setBrush(QBrush(0xffffff));
                 painter->drawRect(all_rect.adjusted(0, 0, 0, 0));
 
-                painter->setFont(QFont("", 10, QFont::Bold));
+                painter->setFont(QFont("", 13, QFont::Bold));
                 painter->setPen(0x720320);
                 painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
             }
@@ -42,20 +42,20 @@ void TabBarStyle::drawControl(ControlElement element, const QStyleOption *option
                 painter->setPen(Qt::transparent);
                 painter->drawRect(all_rect.adjusted(0, 0, 0, 0));
 
-                painter->setFont(QFont("", 10, QFont::Bold));
+                painter->setFont(QFont("", 13, QFont::Bold));
                 painter->setPen(0xFFFFFF);
                 painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
             }
 
             else {
-                painter->setFont(QFont("", 8, QFont::Bold));
+                painter->setFont(QFont("", 10, QFont::Bold));
                 painter->setPen(0xFFFFFF);
                 painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
             }
 
             // icon
             auto icon = tab->icon;
-            QRect icon_rect = all_rect.adjusted(20,15,-20,-28);
+            QRect icon_rect = all_rect.adjusted(20,25,-20,-35);
             painter->drawPixmap(icon_rect,icon.pixmap(QSize(500,500)));
 
             return;
