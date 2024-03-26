@@ -5,8 +5,14 @@
 **Welcome to gnss-sdr-monitor!**
 
 This program is a graphical user interface developed with [Qt](https://www.qt.io/) for monitoring the status of [GNSS-SDR](https://gnss-sdr.org) in real time.
+Besides, it was forked from *acebrianjuan* by me, and I optimized in some parts:
 
-![](./screenshots/gnss-sdr-monitor.png)
+- optimize the socket monitoring the pvt and channel messages, making them run in multi-thread
+- add the tab bar widget to classify different parts
+- ready to alarm the safety of pseudorange
+
+![UI](./screenshots/gnss-sdr-monitor.png)
+![UI](./screenshots/gnss-sdr-monitor2.png)
 
 <table style="width:100%">
   <tr>
@@ -45,7 +51,7 @@ Next, add the following chunk in the `#MONITOR CONFIG#` section. Again, choose t
 Monitor.enable_monitor=true
 Monitor.decimation_factor=1
 Monitor.client_addresses=127.0.0.1
-Monitor.udp_port=1112
+Monitor.udp_port=1234
 ```
 
 This will activate the **serialized stream of data from the Monitor block** to the GUI, which will let you see a table-like widget with the status of each channel accompanied by data readings of the acquisition and tracking stages.
@@ -142,7 +148,7 @@ Once you have installed these packages, you can jump directly to [download the s
 ### <a name="download-and-build-linux">Clone gnss-sdr-monitor Git repository</a>:
 
 ~~~~~~
-$ git clone https://github.com/acebrianjuan/gnss-sdr-monitor
+$ git clone https://github.com/jiachen1119/gnss-sdr-monitor
 ~~~~~~
 
 ### Build and install gnss-sdr-monitor:
