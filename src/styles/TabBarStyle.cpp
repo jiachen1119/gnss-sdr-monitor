@@ -50,7 +50,7 @@ void TabBarStyle::drawControl(ControlElement element, const QStyleOption *option
             else {
                 painter->setFont(QFont("", 10, QFont::Bold));
                 painter->setPen(0xFFFFFF);
-                painter->drawText(all_rect.adjusted(0,0,0,-5), tab->text, text_option);
+                painter->drawText(all_rect.adjusted(0,0,0,-8), tab->text, text_option);
             }
 
             // icon

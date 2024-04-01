@@ -29,7 +29,7 @@
 // 定义tab bar的页面显示
 #define TAB_DASHBORAD   0
 #define TAB_SOLUTION    1
-#define TAB_ALARM       2
+#define TAB_ALERT 2
 #define TAB_SETTINGS    3
 #define TAB_ABOUT       4
 

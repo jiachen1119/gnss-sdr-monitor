@@ -7,6 +7,7 @@
  */
 
 #include "main_window.h"
+#include "CustomTabWidget.h"
 #include "Cn0Delegate.h"
 #include "ConstellationDelegate.h"
 #include "DopplerDelegate.h"
@@ -16,8 +17,6 @@
 #include <QDebug>
 #include <QQmlContext>
 #include <QtCharts>
-#include <QtNetwork/QHostAddress>
-#include <QtNetwork/QNetworkDatagram>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -39,40 +38,77 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setWindowTitle(QStringLiteral("GNSS SDR Monitor designed by SEU Tang"));
 
-    // Tab Bar设置
-    tabBarSetting();
-
     //    QPalette palette;
     //    palette.setColor(QPalette::Window,Qt::black); // 设置背景色
     //    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）
     //    ui->tabWidget_main->setPalette(palette);
 
-    // dashboard widget 设置
-    ui->gridLayout_dashboard->setRowStretch(0,4);
-    ui->gridLayout_dashboard->setRowStretch(1,2);
-    ui->gridLayout_dashboard->setContentsMargins(0,0,0,0);
+    tab_widget_ = new CustomTabWidget();
+    ui->gridLayout->addWidget(tab_widget_);
 
-    // tab widget 设置
-    ui->tabWidget->setTabPosition(QTabWidget::South);
-    ui->tabWidget->setDocumentMode(true);
+    auto *layout_dashborad = new QHBoxLayout(tab_widget_->widget(TAB_DASHBORAD));
+//    layout_dashborad->setContentsMargins(0,0,0,0);
+
+    // QTableView.
+    // Tie the model to the view.
+    channel_view_ = new CustomChannelView(tab_widget_->widget(TAB_DASHBORAD));
+    // Model.
+    channelTableModel_ = new ChannelTableModel();
+    layout_dashborad->addWidget(channel_view_);
+    channel_view_->setModel(channelTableModel_);
+    channel_view_->setItemDelegateForColumn(CHANNEL_CONSTELLATION, new ConstellationDelegate());
+    channel_view_->setItemDelegateForColumn(CHANNEL_CN0, new Cn0Delegate());
+    channel_view_->setItemDelegateForColumn(CHANNEL_DOPPLER, new DopplerDelegate());
+    channel_view_->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
 
     // Monitor_Pvt_Wrapper.
     monitorPvtWrapper_ = new MonitorPvtWrapper();
 
     // Telecommand widget
-    auto layout = new QVBoxLayout(ui->telecomWidget);
-    telecommandWidget_ = new TelecommandWidget(ui->telecomWidget);
-    layout->addWidget(telecommandWidget_);
-    ui->telecomWidget->setMaximumWidth(this->width()/2);
-    ui->telecomWidget->setMaximumHeight(this->height()/2);
+    auto layout_settings = new QVBoxLayout(tab_widget_->widget(TAB_SETTINGS));
+    telecommandWidget_ = new TelecommandWidget();
+    layout_settings->addWidget(telecommandWidget_);
+
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
     // map tab page setting
-    auto layout_map = new QHBoxLayout(ui->tab_2);
-    ui->tab_2->setLayout(layout_map);
+    auto layout_solution = new QGridLayout(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->setRowStretch(0,3);
+    layout_solution->setRowStretch(1,2);
+    layout_solution->setColumnStretch(0,1);
+    layout_solution->setColumnStretch(1,1);
+    layout_solution->setColumnStretch(2,1);
+    layout_solution->setColumnStretch(3,1);
+
+    // PVT widget.
+    auto solution_table = new CustomTableView(tab_widget_->widget(TAB_SOLUTION));
+    solution_table->horizontalHeader()->hide();
+    pvtTableModel_ = new PVTTableModel(solution_table);
+    solution_table->setModel(pvtTableModel_);
+    layout_solution->addWidget(solution_table,0,0,1,1);
+
+    // Map widget.
+    mapWidget_ = new QQuickWidget(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->addWidget(mapWidget_,0,1,1,3);
+    mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
+    mapWidget_->setSource(QUrl("qrc:/qml/main.qml"));
+    mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+
+    // Altitude widget.
+    altitudeWidget_ = new AltitudeWidget(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->addWidget(altitudeWidget_,1,0,1,2);
+    connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitudeWidget_, &AltitudeWidget::addData);
+    connect(&updateTimer_, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
+
+    // Dilution of precision widget.
+    DOPWidget_ = new DOPWidget(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->addWidget(DOPWidget_,1,2,1,2);
+    connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
+    connect(&updateTimer_, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
+
 
     // alarm tab page setting
-    auto layout_alarm = new QVBoxLayout(ui->tabWidget_main->widget(2));
+    auto layout_alarm = new QVBoxLayout(tab_widget_->widget(2));
     layout_alarm->setStretch(0,2);
     layout_alarm->setStretch(1,1);
 
@@ -93,35 +129,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto alLog = new QTextBrowser;
     layout_alarm->addWidget(alLog);
-
-    // PVT widget.
-    auto solution_table = new CustomTableView(ui->tab_2);
-    solution_table->horizontalHeader()->hide();
-    pvtTableModel_ = new PVTTableModel(solution_table);
-    solution_table->setModel(pvtTableModel_);
-    layout_map->addWidget(solution_table);
-
-    // Map widget.
-    mapWidget_ = new QQuickWidget(ui->tab_2);
-    layout_map->addWidget(mapWidget_);
-    mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
-    mapWidget_->setSource(QUrl("qrc:/qml/main.qml"));
-    mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
-
-    layout_map->setStretch(0,1);
-    layout_map->setStretch(1,3);
-    
-    // Altitude widget.
-    altitudeWidget_ = new AltitudeWidget(ui->tabWidget);
-    ui->tabWidget->addTab(altitudeWidget_, QStringLiteral("Altitude"));
-    connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitudeWidget_, &AltitudeWidget::addData);
-    connect(&updateTimer_, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
-
-    // Dilution of precision widget.
-    DOPWidget_ = new DOPWidget(ui->tabWidget);
-    ui->tabWidget->addTab(DOPWidget_, QStringLiteral("DOP"));
-    connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
-    connect(&updateTimer_, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
 
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
@@ -149,17 +156,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(clear_, &QAction::triggered, this, &MainWindow::clearEntries);
     connect(closePlotsAction_, &QAction::triggered, this, &MainWindow::closePlots);
 
-    // Model.
-    channelTableModel_ = new ChannelTableModel();
-
-    // QTableView.
-    // Tie the model to the view.
-    ui->tableView->setModel(channelTableModel_);
-    ui->tableView->setItemDelegateForColumn(CHANNEL_CONSTELLATION, new ConstellationDelegate());
-    ui->tableView->setItemDelegateForColumn(CHANNEL_CN0, new Cn0Delegate());
-    ui->tableView->setItemDelegateForColumn(CHANNEL_DOPPLER, new DopplerDelegate());
-    ui->tableView->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
-
     // Sockets.
     socketGnssSynchro_ = std::make_unique<SocketGnss>(nullptr,1234);
     socketMonitorPvt_ = std::make_unique<SocketPVT>(nullptr, 1111);
@@ -175,8 +171,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(socketMonitorPvt_.get(), &SocketPVT::sendData, this, &MainWindow::receiveMonitorPvt);
     connect(qApp, &QApplication::aboutToQuit, socketMonitorPvt_.get(), &SocketPVT::stopThread);
 
-    connect(ui->tableView, &QTableView::clicked, this, &MainWindow::expandPlot);
-    connect(ui->tableView, &QTableView::doubleClicked, this, &MainWindow::expandPlot);
+    connect(channel_view_, &QTableView::clicked, this, &MainWindow::expandPlot);
+    connect(channel_view_, &QTableView::doubleClicked, this, &MainWindow::expandPlot);
 
     // about project 和 about qt 弹出窗口
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
@@ -263,7 +259,7 @@ void MainWindow::saveSettings()
     for (int i = 0; i < channelTableModel_->getColumns(); i++)
     {
         settings_.setArrayIndex(i);
-        settings_.setValue("width", ui->tableView->columnWidth(i));
+        settings_.setValue("width", channel_view_->columnWidth(i));
     }
     settings_.endArray();
     settings_.endGroup();
@@ -281,7 +277,7 @@ void MainWindow::loadSettings()
     for (int i = 0; i < channelTableModel_->getColumns(); i++)
     {
         settings_.setArrayIndex(i);
-        ui->tableView->setColumnWidth(i, settings_.value("width", 100).toInt());
+        channel_view_->setColumnWidth(i, settings_.value("width", 100).toInt());
     }
     settings_.endArray();
     settings_.endGroup();
@@ -470,83 +466,4 @@ void MainWindow::about()
         "<p>bug和功能建议可以联系我们： kxn1119@gmail.com</p>";
 
     QMessageBox::about(this, "About gnss-sdr-monitor", text);
-}
-void MainWindow::tabBarSetting()
-{
-    // 左侧侧边栏设置
-    ui->tabWidget_main->setTabPosition(QTabWidget::West);
-    ui->tabWidget_main->setDocumentMode(true);
-
-    // 自定义qstyle
-    ui->tabWidget_main->tabBar()->setStyle(new TabBarStyle);
-
-    // 设置起始页
-    ui->tabWidget_main->setCurrentIndex(0);
-
-    // 只有开启WA_Hover才可以探查到是否有鼠标悬浮
-    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_Hover, true);
-    ui->tabWidget_main->tabBar()->setAttribute(Qt::WA_StyledBackground, true);
-
-    // 设置背景色和边界距离
-    ui->tabWidget_main->tabBar()->setStyleSheet("background-color: #414141;");
-    ui->tabWidget_main->widget(0)->setStyleSheet("background-color: #ececec;");
-    ui->tabWidget_main->tabBar()->setContentsMargins(0,0,0,0);
-
-    // 设置Icon
-    ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(0, QStringLiteral("Dashboard"));
-
-    ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(1, QStringLiteral("Solution"));
-
-    ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/alarm2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(2, QStringLiteral("Alarm"));
-
-    ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/settings2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(3, QStringLiteral("Settings"));
-
-    ui->tabWidget_main->tabBar()->setTabIcon(4,QIcon(":/images/about2.svg"));
-    ui->tabWidget_main->tabBar()->setTabText(4, QStringLiteral("About"));
-
-    // 设置Icon切换
-    connect(ui->tabWidget_main,&QTabWidget::currentChanged, this,
-        [=](int index){
-            if (index == TAB_DASHBORAD){
-                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/alarm2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(4,QIcon(":/images/about2.svg"));
-            }
-            else if (index == TAB_SOLUTION){
-                ui->tabWidget_main->tabBar()->setTabIcon(0,QIcon(":/images/dashboard2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1,QIcon(":/images/map.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2,QIcon(":/images/alarm2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3,QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(4,QIcon(":/images/about2.svg"));
-            }
-            else if (index == TAB_ALARM)
-            {
-                ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about2.svg"));
-            }
-            else if (index == TAB_SETTINGS)
-            {
-                ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about2.svg"));
-            }
-            else{
-                ui->tabWidget_main->tabBar()->setTabIcon(0, QIcon(":/images/dashboard2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(1, QIcon(":/images/map2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(2, QIcon(":/images/alarm2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(3, QIcon(":/images/settings2.svg"));
-                ui->tabWidget_main->tabBar()->setTabIcon(4, QIcon(":/images/about.svg"));
-            }
-        });
 }

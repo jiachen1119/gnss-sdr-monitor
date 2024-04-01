@@ -11,8 +11,9 @@ CustomChannelView::CustomChannelView(QWidget *parent) : QTableView (parent)
     this->setShowGrid(false);
 
     this->horizontalHeader()->setMinimumWidth(60);//设置水平单元格最小宽度
-    this->verticalHeader()->setMinimumSectionSize(40);//设置垂直单元格最小高度
-    this->verticalHeader()->setMaximumSectionSize(60);//设置垂直单元格最大高度
+    this->verticalHeader()->setMinimumSectionSize(50);//设置垂直单元格最小高度
+    this->verticalHeader()->setMaximumSectionSize(72);//设置垂直单元格最大高度
+    this->verticalHeader()->setDefaultSectionSize(90);
 }
 
 void CustomChannelView::resizeEvent(QResizeEvent *event)
