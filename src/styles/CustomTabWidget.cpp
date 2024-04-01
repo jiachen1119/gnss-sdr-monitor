@@ -25,7 +25,7 @@ CustomTabWidget::CustomTabWidget(QWidget *parent) : QTabWidget(parent)
     this->tabBar()->setContentsMargins(0,0,0,0);
 
     // 添加tab
-    this->addTab(new QWidget,QStringLiteral("Dashboard"));
+    this->addTab(new QWidget,QStringLiteral("Channel"));
     this->addTab(new QWidget,QStringLiteral("Solution"));
     this->addTab(new QWidget,QStringLiteral("Alert"));
     this->addTab(new QWidget,QStringLiteral("Settings"));
@@ -35,8 +35,8 @@ CustomTabWidget::CustomTabWidget(QWidget *parent) : QTabWidget(parent)
     this->setCurrentIndex(0);
 
     // 设置Icon
-    auto iconDashboard_push = QIcon(":/images/dashboard.svg");
-    auto iconDashboard_normal = QIcon(":/images/dashboard2.svg");
+    auto icon_channel_push = QIcon(":/images/dashboard.svg");
+    auto icon_channel_normal = QIcon(":/images/dashboard2.svg");
 
     auto iconSolution_push = QIcon(":/images/map.svg");
     auto iconSolution_normal = QIcon(":/images/map2.svg");
@@ -50,12 +50,12 @@ CustomTabWidget::CustomTabWidget(QWidget *parent) : QTabWidget(parent)
     auto iconAbout_push = QIcon(":/images/about.svg");
     auto iconAbout_normal = QIcon(":/images/about2.svg");
 
-    std::vector<QIcon> icon_normal { iconDashboard_normal, iconSolution_normal,
+    std::vector<QIcon> icon_normal {icon_channel_normal, iconSolution_normal,
         iconAlert_normal, iconSettings_normal,iconAbout_normal};
-    std::vector<QIcon> icon_push { iconDashboard_push, iconSolution_push,
+    std::vector<QIcon> icon_push {icon_channel_push, iconSolution_push,
         iconAlert_push, iconSettings_push, iconAbout_push};
 
-    this->tabBar()->setTabIcon(TAB_DASHBORAD, icon_push.at(TAB_DASHBORAD));
+    this->tabBar()->setTabIcon(TAB_CHANNEL, icon_push.at(TAB_CHANNEL));
     this->tabBar()->setTabIcon(TAB_SOLUTION, icon_normal.at(TAB_SOLUTION));
     this->tabBar()->setTabIcon(TAB_ALERT, icon_normal.at(TAB_ALERT));
     this->tabBar()->setTabIcon(TAB_SETTINGS, icon_normal.at(TAB_SETTINGS));
@@ -64,7 +64,7 @@ CustomTabWidget::CustomTabWidget(QWidget *parent) : QTabWidget(parent)
     // 设置Icon切换
     connect(this,&QTabWidget::currentChanged, this,
         [=](int index){
-            this->tabBar()->setTabIcon(TAB_DASHBORAD, icon_normal.at(TAB_DASHBORAD));
+            this->tabBar()->setTabIcon(TAB_CHANNEL, icon_normal.at(TAB_CHANNEL));
             this->tabBar()->setTabIcon(TAB_SOLUTION, icon_normal.at(TAB_SOLUTION));
             this->tabBar()->setTabIcon(TAB_ALERT, icon_normal.at(TAB_ALERT));
             this->tabBar()->setTabIcon(TAB_SETTINGS, icon_normal.at(TAB_SETTINGS));

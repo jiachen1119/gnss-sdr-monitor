@@ -9,6 +9,7 @@ CustomTableView::CustomTableView(QWidget *parent) : QTableView (parent)
 {
     this->setSelectionMode(QTableView::NoSelection);
     this->verticalHeader()->setSectionsClickable(false);
+    this->horizontalHeader()->hide();
 
     this->horizontalHeader()->setMinimumWidth(60);//设置水平单元格最小宽度
     this->verticalHeader()->setMinimumSectionSize(30);//设置垂直单元格最小高度

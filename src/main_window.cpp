@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     updateTimer_.setInterval(500);
     updateTimer_.setSingleShot(true);
     connect(&updateTimer_, &QTimer::timeout, [this] { channelTableModel_->update(); });
-    connect(&updateTimer_, &QTimer::timeout, [this] { pvtTableModel_->update(); });
+    connect(&updateTimer_, &QTimer::timeout, [this] { pvt_table_model_->update(); });
 
     // UI设置
     ui->setupUi(this);
@@ -43,23 +43,25 @@ MainWindow::MainWindow(QWidget *parent)
     //    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）
     //    ui->tabWidget_main->setPalette(palette);
 
+    // 添加tab
     tab_widget_ = new CustomTabWidget();
     ui->gridLayout->addWidget(tab_widget_);
 
-    auto *layout_dashborad = new QHBoxLayout(tab_widget_->widget(TAB_DASHBORAD));
-//    layout_dashborad->setContentsMargins(0,0,0,0);
-
     // QTableView.
-    // Tie the model to the view.
-    channel_view_ = new CustomChannelView(tab_widget_->widget(TAB_DASHBORAD));
+    channel_view_ = new CustomChannelView(tab_widget_->widget(TAB_CHANNEL));
     // Model.
     channelTableModel_ = new ChannelTableModel();
-    layout_dashborad->addWidget(channel_view_);
     channel_view_->setModel(channelTableModel_);
+    // add delegates to channel view
     channel_view_->setItemDelegateForColumn(CHANNEL_CONSTELLATION, new ConstellationDelegate());
     channel_view_->setItemDelegateForColumn(CHANNEL_CN0, new Cn0Delegate());
     channel_view_->setItemDelegateForColumn(CHANNEL_DOPPLER, new DopplerDelegate());
     channel_view_->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
+
+    // layout for channel
+    auto *layout_channel = new QHBoxLayout(tab_widget_->widget(TAB_CHANNEL));
+    layout_channel->setContentsMargins(0,0,0,0);
+    layout_channel->addWidget(channel_view_);
 
     // Monitor_Pvt_Wrapper.
     monitorPvtWrapper_ = new MonitorPvtWrapper();
@@ -68,10 +70,9 @@ MainWindow::MainWindow(QWidget *parent)
     auto layout_settings = new QVBoxLayout(tab_widget_->widget(TAB_SETTINGS));
     telecommandWidget_ = new TelecommandWidget();
     layout_settings->addWidget(telecommandWidget_);
-
     connect(telecommandWidget_, &TelecommandWidget::resetClicked, this, &MainWindow::clearEntries);
 
-    // map tab page setting
+    // solution tab page
     auto layout_solution = new QGridLayout(tab_widget_->widget(TAB_SOLUTION));
     layout_solution->setRowStretch(0,3);
     layout_solution->setRowStretch(1,2);
@@ -80,31 +81,30 @@ MainWindow::MainWindow(QWidget *parent)
     layout_solution->setColumnStretch(2,1);
     layout_solution->setColumnStretch(3,1);
 
-    // PVT widget.
+    // PVT message table
     auto solution_table = new CustomTableView(tab_widget_->widget(TAB_SOLUTION));
-    solution_table->horizontalHeader()->hide();
-    pvtTableModel_ = new PVTTableModel(solution_table);
-    solution_table->setModel(pvtTableModel_);
+    pvt_table_model_ = new PVTTableModel(solution_table);
+    solution_table->setModel(pvt_table_model_);
     layout_solution->addWidget(solution_table,0,0,1,1);
 
     // Map widget.
-    mapWidget_ = new QQuickWidget(tab_widget_->widget(TAB_SOLUTION));
-    layout_solution->addWidget(mapWidget_,0,1,1,3);
-    mapWidget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
-    mapWidget_->setSource(QUrl("qrc:/qml/main.qml"));
-    mapWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    map_widget_ = new QQuickWidget(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->addWidget(map_widget_,0,1,1,3);
+    map_widget_->rootContext()->setContextProperty("monitor_pvt_wrapper_", monitorPvtWrapper_);
+    map_widget_->setSource(QUrl("qrc:/qml/main.qml"));
+    map_widget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
     // Altitude widget.
-    altitudeWidget_ = new AltitudeWidget(tab_widget_->widget(TAB_SOLUTION));
-    layout_solution->addWidget(altitudeWidget_,1,0,1,2);
-    connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitudeWidget_, &AltitudeWidget::addData);
-    connect(&updateTimer_, &QTimer::timeout, altitudeWidget_, &AltitudeWidget::redraw);
+    altitude_widget_ = new AltitudeWidget(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->addWidget(altitude_widget_,1,0,1,2);
+    connect(monitorPvtWrapper_, &MonitorPvtWrapper::altitudeChanged, altitude_widget_, &AltitudeWidget::addData);
+    connect(&updateTimer_, &QTimer::timeout, altitude_widget_, &AltitudeWidget::redraw);
 
     // Dilution of precision widget.
-    DOPWidget_ = new DOPWidget(tab_widget_->widget(TAB_SOLUTION));
-    layout_solution->addWidget(DOPWidget_,1,2,1,2);
-    connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, DOPWidget_, &DOPWidget::addData);
-    connect(&updateTimer_, &QTimer::timeout, DOPWidget_, &DOPWidget::redraw);
+    dop_widget_ = new DOPWidget(tab_widget_->widget(TAB_SOLUTION));
+    layout_solution->addWidget(dop_widget_,1,2,1,2);
+    connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, dop_widget_, &DOPWidget::addData);
+    connect(&updateTimer_, &QTimer::timeout, dop_widget_, &DOPWidget::redraw);
 
 
     // alarm tab page setting
@@ -182,7 +182,10 @@ MainWindow::MainWindow(QWidget *parent)
     loadSettings();
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+    quit();
+    delete ui;
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -223,7 +226,7 @@ void MainWindow::receiveMonitorPvt(PVTStruct in)
     // 当有消息待处理
     if (stop_->isEnabled())
     {
-        pvtTableModel_->populatePVT(in);
+        pvt_table_model_->populatePVT(in);
         monitorPvtWrapper_->addMonitorPvt(in);
     }
 }
@@ -233,13 +236,13 @@ void MainWindow::clearEntries()
     channelTableModel_->clearChannels();
     channelTableModel_->update();
 
-    altitudeWidget_->clear();
-    altitudeWidget_->redraw();
+    altitude_widget_->clear();
+    altitude_widget_->redraw();
 
-    pvtTableModel_->clearData();
-    pvtTableModel_->update();
+    pvt_table_model_->clearData();
+    pvt_table_model_->update();
 
-    DOPWidget_->clear();
+    dop_widget_->clear();
 
     clear_->setEnabled(false);
 }
@@ -299,12 +302,9 @@ void MainWindow::setPort()
 {
     QSettings settings;
     settings.beginGroup("Preferences_Dialog");
-    m_portGnssSynchro = settings.value("port_gnss_synchro", 1234).toInt();
-    m_portMonitorPvt = settings.value("port_monitor_pvt", 1111).toInt();
+    socketGnssSynchro_->setPort(settings.value("port_gnss_synchro", 1234).toInt());
+    socketMonitorPvt_->setPort(settings.value("port_monitor_pvt", 1111).toInt());
     settings.endGroup();
-
-    socketGnssSynchro_->setPort(m_portGnssSynchro);
-    socketMonitorPvt_->setPort(m_portMonitorPvt);
 }
 
 void MainWindow::expandPlot(const QModelIndex &index)

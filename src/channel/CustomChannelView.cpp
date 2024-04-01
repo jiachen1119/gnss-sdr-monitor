@@ -14,6 +14,12 @@ CustomChannelView::CustomChannelView(QWidget *parent) : QTableView (parent)
     this->verticalHeader()->setMinimumSectionSize(50);//设置垂直单元格最小高度
     this->verticalHeader()->setMaximumSectionSize(72);//设置垂直单元格最大高度
     this->verticalHeader()->setDefaultSectionSize(90);
+
+    // 设置表格文字大小
+    this->setFont(QFont("Calibri", 15, QFont::Medium));
+
+    this->horizontalHeader()->setFixedHeight(40);
+
 }
 
 void CustomChannelView::resizeEvent(QResizeEvent *event)
@@ -27,7 +33,6 @@ void CustomChannelView::showEvent(QShowEvent *event)
 {
     QTableView::showEvent(event);
     autoAdjustTableItemWidth();
-    //    autoAdjustTableItemHeight();
 }
 
 void CustomChannelView::autoAdjustTableItemWidth()

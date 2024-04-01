@@ -76,22 +76,18 @@ private:
     CustomTabWidget *tab_widget_;
     CustomChannelView *channel_view_;
 
-    QQuickWidget *mapWidget_;
-
+    QQuickWidget *map_widget_;
 
     TelecommandWidget *telecommandWidget_;
-    AltitudeWidget *altitudeWidget_;
-    DOPWidget *DOPWidget_;
+    AltitudeWidget *altitude_widget_;
+    DOPWidget *dop_widget_;
 
     ChannelTableModel *channelTableModel_;
-    PVTTableModel *pvtTableModel_;
+    PVTTableModel *pvt_table_model_;
 
     std::unique_ptr<SocketGnss> socketGnssSynchro_;
     std::unique_ptr<SocketPVT> socketMonitorPvt_;
     MonitorPvtWrapper *monitorPvtWrapper_;
-    std::vector<int> m_channels;
-    quint16 m_portGnssSynchro;
-    quint16 m_portMonitorPvt;
     QSettings settings_;
     QTimer updateTimer_;
 

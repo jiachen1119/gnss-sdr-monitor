@@ -27,7 +27,7 @@
 #define CHANNEL_PSEUDORANGE     9
 
 // 定义tab bar的页面显示
-#define TAB_DASHBORAD   0
+#define TAB_CHANNEL 0
 #define TAB_SOLUTION    1
 #define TAB_ALERT 2
 #define TAB_SETTINGS    3
