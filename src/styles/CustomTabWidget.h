@@ -6,6 +6,7 @@
 #define GNSS_SDR_MONITOR_CUSTOMTABWIDGET_H
 
 #include "QTabWidget"
+#include "AlertWidget.h"
 
 class CustomTabWidget : public QTabWidget
 {
@@ -13,6 +14,9 @@ class CustomTabWidget : public QTabWidget
 public:
     explicit CustomTabWidget(QWidget *parent = nullptr);
     ~CustomTabWidget() override = default;
+
+private:
+    AlertWidget *alert_widget_;
 };
 
 

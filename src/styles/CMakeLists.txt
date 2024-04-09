@@ -8,4 +8,4 @@ set(QT5_LIBRARIES
         Qt5::Widgets
         Qt5::PrintSupport
 )
-target_link_libraries(styles PUBLIC ${QT5_LIBRARIES} lib channel)
+target_link_libraries(styles PUBLIC ${QT5_LIBRARIES} lib channel alert)

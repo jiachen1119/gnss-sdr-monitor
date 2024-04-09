@@ -106,30 +106,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, dop_widget_, &DOPWidget::addData);
     connect(&updateTimer_, &QTimer::timeout, dop_widget_, &DOPWidget::redraw);
 
-
-    // alarm tab page setting
-    auto layout_alarm = new QVBoxLayout(tab_widget_->widget(2));
-    layout_alarm->setStretch(0,2);
-    layout_alarm->setStretch(1,1);
-
-    auto layout_AL = new QHBoxLayout();
-    layout_AL->setStretch(0,2);
-    layout_AL->setStretch(1,3);
-    layout_alarm->addLayout(layout_AL);
-
-    auto alAL = new CustomChartView(nullptr, false);
-    alAL->setTitle(QStringLiteral("AL Level"));
-    alAL->setAxisTitle("Time (s)","Level");
-
-    auto alPosition = new CustomChartView(nullptr, false);
-    alPosition->setTitle(QStringLiteral("Position after Correction"));
-
-    layout_AL->addWidget(alAL);
-    layout_AL->addWidget(alPosition);
-
-    auto alLog = new QTextBrowser;
-    layout_alarm->addWidget(alLog);
-
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
     ui->actionQuit->setShortcuts(QKeySequence::Quit);

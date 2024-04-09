@@ -11,6 +11,7 @@
 #ifndef GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 #define GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 
+#include "AlertWidget.h"
 #include "AltitudeWidget.h"
 #include "ChannelTableModel.h"
 #include "CustomChannelView.h"

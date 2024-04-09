@@ -24,10 +24,12 @@ CustomTabWidget::CustomTabWidget(QWidget *parent) : QTabWidget(parent)
     //    this->widget(0)->setStyleSheet("background-color: #ececec;");
     this->tabBar()->setContentsMargins(0,0,0,0);
 
+    alert_widget_ = new AlertWidget(nullptr);
+
     // 添加tab
     this->addTab(new QWidget,QStringLiteral("Channel"));
     this->addTab(new QWidget,QStringLiteral("Solution"));
-    this->addTab(new QWidget,QStringLiteral("Alert"));
+    this->addTab(alert_widget_,QStringLiteral("Alert"));
     this->addTab(new QWidget,QStringLiteral("Settings"));
     this->addTab(new QWidget,QStringLiteral("About"));
 
