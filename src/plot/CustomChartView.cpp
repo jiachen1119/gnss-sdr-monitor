@@ -17,19 +17,51 @@ CustomChartView::CustomChartView(QWidget *parent, bool isPoint) : QChartView(par
     this->setChart(chart_.get());
     chart_->legend()->hide();
     if (isPoint){
-        scatterSeries_ = std::make_unique<QScatterSeries>(chart_.get());
-        scatterSeries_->setMarkerSize(8);
-        chart_->addSeries(scatterSeries_.get());
+        scatterSeries_.push_back(std::make_unique<QScatterSeries>(chart_.get()));
+        scatterSeries_.at(0)->setMarkerSize(8);
+        chart_->addSeries(scatterSeries_.at(0).get());
     }
     else{
-        lineSeries_ = std::make_unique<QLineSeries>(chart_.get());
-        chart_->addSeries(lineSeries_.get());
+        lineSeries_ .push_back(std::make_unique<QLineSeries>(chart_.get()));
+        chart_->addSeries(lineSeries_.at(0).get());
     }
 
     chart_->createDefaultAxes();
     chart_->layout()->setContentsMargins(0,0,0,0);
     chart_->setContentsMargins(-18, -18, -14, -16);
 }
+
+CustomChartView::CustomChartView(QWidget* parent, bool isPoint, int num_series) : QChartView(parent)
+{
+    isPoint_ = isPoint;
+
+    // 抗锯齿
+    this->setRenderHint(QPainter::Antialiasing, true);
+    this->setContentsMargins(0,0,0,0);
+
+    // 不去设置parent
+    chart_ = std::make_unique<QChart>();
+    // 必须设置chartview的chart，否则不会出现图线
+    this->setChart(chart_.get());
+    chart_->legend()->setVisible(true);
+    chart_->legend()->setFont(QFont("Calibri", 15, QFont::Medium));
+    for (int i = 0; i < num_series; ++i)
+    {
+        if (isPoint){
+            scatterSeries_.push_back(std::make_unique<QScatterSeries>(chart_.get()));
+            scatterSeries_.at(i)->setMarkerSize(8);
+            chart_->addSeries(scatterSeries_.at(i).get());
+        }
+        else{
+            lineSeries_ .push_back(std::make_unique<QLineSeries>(chart_.get()));
+            chart_->addSeries(lineSeries_.at(i).get());
+        }
+    }
+    chart_->createDefaultAxes();
+    chart_->layout()->setContentsMargins(0,0,0,0);
+    chart_->setContentsMargins(-18, -18, -14, -16);
+}
+
 
 void CustomChartView::updateChart(const QModelIndex &index)
 {
@@ -55,9 +87,9 @@ void CustomChartView::updateChart(const QModelIndex &index)
         max_y = std::max(max_y, p.y());
     }
     if (isPoint_)
-        scatterSeries_->replace(points);
+        scatterSeries_.at(0)->replace(points);
     else
-        lineSeries_->replace(points);
+        lineSeries_.at(0)->replace(points);
 
     chart_->axes(Qt::Horizontal).back()->setRange(min_x,max_x);
     chart_->axes(Qt::Vertical).back()->setRange(min_y,max_y);
@@ -80,7 +112,7 @@ void CustomChartView::updateCN0Chart(const QModelIndex &index)
         min_x = std::min(min_x, p.x());
         max_x = std::max(max_x, p.x());
     }
-    lineSeries_->replace(points);
+    lineSeries_.at(0)->replace(points);
 
     chart_->axes(Qt::Horizontal).back()->setRange(min_x,max_x);
     chart_->axes(Qt::Vertical).back()->setRange(25,55);
@@ -109,9 +141,9 @@ void CustomChartView::updateChart_noIndex(const boost::circular_buffer<QPointF>&
         }
 
         if (isPoint_)
-            scatterSeries_->replace(points);
+            scatterSeries_.at(0)->replace(points);
         else
-            lineSeries_->replace(points);
+            lineSeries_.at(0)->replace(points);
 
         chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
         chart_->axes(Qt::Vertical).back()->setRange(min_y, max_y);
@@ -119,9 +151,51 @@ void CustomChartView::updateChart_noIndex(const boost::circular_buffer<QPointF>&
     else{
         QVector<QPointF> empty_vector;
         if (isPoint_)
-            scatterSeries_->replace(empty_vector);
+            scatterSeries_.at(0)->replace(empty_vector);
         else
-            lineSeries_->replace(empty_vector);
+            lineSeries_.at(0)->replace(empty_vector);
+    }
+}
+
+void CustomChartView::updateChart_noIndex(const boost::circular_buffer<QPointF>& buffer, int index)
+{
+    if (index + 1 > std::max(scatterSeries_.size(),lineSeries_.size())){
+        return;
+    }
+    if (!buffer.empty())
+    {
+        double min_x = std::numeric_limits<double>::max();
+        double max_x = -std::numeric_limits<double>::max();
+
+        double min_y = std::numeric_limits<double>::max();
+        double max_y = -std::numeric_limits<double>::max();
+
+        QVector<QPointF> points;
+
+        for (auto i : buffer)
+        {
+            points << i;
+            min_x = std::min(min_x, i.x());
+            min_y = std::min(min_y, i.y());
+
+            max_x = std::max(max_x, i.x());
+            max_y = std::max(max_y, i.y());
+        }
+
+        if (isPoint_)
+            scatterSeries_.at(index)->replace(points);
+        else
+            lineSeries_.at(index)->replace(points);
+
+        chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
+        chart_->axes(Qt::Vertical).back()->setRange(min_y, max_y);
+    }
+    else{
+        QVector<QPointF> empty_vector;
+        if (isPoint_)
+            scatterSeries_.at(index)->replace(empty_vector);
+        else
+            lineSeries_.at(index)->replace(empty_vector);
     }
 }
 
@@ -141,4 +215,17 @@ void CustomChartView::setAxisTitle(const QString& x_title, const QString& y_titl
     chart_->axes(Qt::Vertical).back()->setTitleFont(QFont("Calibri", 13, QFont::DemiBold));
     chart_->axes(Qt::Vertical).back()->setLabelsFont(QFont("Calibri", 12, QFont::Medium));
 
+}
+
+void CustomChartView::setLegend(const int& index, const QString& name)
+{
+    if (index + 1 > std::max(scatterSeries_.size(),lineSeries_.size()))
+        return;
+    if (scatterSeries_.size() > lineSeries_.size()){
+        scatterSeries_.at(index)->setName(name);
+    }
+    else
+    {
+        lineSeries_.at(index)->setName(name);
+    }
 }

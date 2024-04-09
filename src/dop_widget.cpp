@@ -52,7 +52,7 @@ DOPWidget::DOPWidget(QWidget *parent) : QWidget(parent)
 
     chart->setTitle("DOP vs Time");
     chart->createDefaultAxes();
-    chart->axes(Qt::Horizontal).back()->setTitleText("TOW [s]");
+    chart->axes(Qt::Horizontal).back()->setTitleText("TOW (s)");
     chart->axes(Qt::Vertical).back()->setTitleText("DOP");
     chart->layout()->setContentsMargins(0, 0, 0, 0);
     chart->setContentsMargins(-18, -18, -14, -16);

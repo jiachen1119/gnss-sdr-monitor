@@ -12,7 +12,7 @@ AlertWidget::AlertWidget(QWidget *parent): QWidget(parent)
     layout_->setColumnStretch(0, 1);
     layout_->setColumnStretch(1, 1);
 
-    al_level_ = new CustomChartView(nullptr, false);
+    al_level_ = new CustomChartView(nullptr, false,2);
     al_level_->setTitle(QStringLiteral("AL Level"));
     al_level_->setAxisTitle("Time (s)", "Level");
 
@@ -69,6 +69,10 @@ AlertWidget::AlertWidget(QWidget *parent): QWidget(parent)
         }
     }
     file.close();
-    al_level_->updateChart_noIndex(buffer_HPE);
+    al_level_->updateChart_noIndex(buffer_HPE,0);
+    al_level_->updateChart_noIndex(buffer_HPL,1);
+
+    al_level_->setLegend(0, QStringLiteral("HPE"));
+    al_level_->setLegend(1, QStringLiteral("HPL"));
 
 }
