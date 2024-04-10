@@ -220,6 +220,7 @@ void MainWindow::clearEntries()
     pvt_table_model_->update();
 
     dop_widget_->clear();
+    dop_widget_->redraw();
 
     clear_->setEnabled(false);
 }

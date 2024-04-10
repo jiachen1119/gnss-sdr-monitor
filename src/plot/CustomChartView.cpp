@@ -164,31 +164,48 @@ void CustomChartView::updateChart_noIndex(const boost::circular_buffer<QPointF>&
     }
     if (!buffer.empty())
     {
-        double min_x = std::numeric_limits<double>::max();
-        double max_x = -std::numeric_limits<double>::max();
+        if (auto_scale_){
+            double min_x = std::numeric_limits<double>::max();
+            double max_x = -std::numeric_limits<double>::max();
 
-        double min_y = std::numeric_limits<double>::max();
-        double max_y = -std::numeric_limits<double>::max();
+            double min_y = std::numeric_limits<double>::max();
+            double max_y = -std::numeric_limits<double>::max();
 
-        QVector<QPointF> points;
+            QVector<QPointF> points;
 
-        for (auto i : buffer)
-        {
-            points << i;
-            min_x = std::min(min_x, i.x());
-            min_y = std::min(min_y, i.y());
+            for (auto i : buffer)
+            {
+                points << i;
+                min_x = std::min(min_x, i.x());
+                min_y = std::min(min_y, i.y());
 
-            max_x = std::max(max_x, i.x());
-            max_y = std::max(max_y, i.y());
+                max_x = std::max(max_x, i.x());
+                max_y = std::max(max_y, i.y());
+            }
+            chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
+            chart_->axes(Qt::Vertical).back()->setRange(min_y, max_y);
+            if (isPoint_)
+                scatterSeries_.at(index)->replace(points);
+            else
+                lineSeries_.at(index)->replace(points);
         }
+        else{
+            double min_x = std::numeric_limits<double>::max();
+            double max_x = -std::numeric_limits<double>::max();
+            QVector<QPointF> points;
 
-        if (isPoint_)
-            scatterSeries_.at(index)->replace(points);
-        else
-            lineSeries_.at(index)->replace(points);
-
-        chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
-        chart_->axes(Qt::Vertical).back()->setRange(min_y, max_y);
+            for (auto i : buffer)
+            {
+                points << i;
+                min_x = std::min(min_x, i.x());
+                max_x = std::max(max_x, i.x());
+            }
+            chart_->axes(Qt::Horizontal).back()->setRange(min_x, max_x);
+            if (isPoint_)
+                scatterSeries_.at(index)->replace(points);
+            else
+                lineSeries_.at(index)->replace(points);
+        }
     }
     else{
         QVector<QPointF> empty_vector;
@@ -228,4 +245,25 @@ void CustomChartView::setLegend(const int& index, const QString& name)
     {
         lineSeries_.at(index)->setName(name);
     }
+}
+
+void CustomChartView::clear()
+{
+    if (!lineSeries_.empty()){
+        for (const auto & i : lineSeries_)
+        {
+            i->clear();
+        }
+    }
+    if (!scatterSeries_.empty()){
+        for (const auto & j : scatterSeries_)
+        {
+            j->clear();
+        }
+    }
+}
+
+void CustomChartView::setAutoScale(bool open)
+{
+    auto_scale_ = open;
 }

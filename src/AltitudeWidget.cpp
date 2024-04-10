@@ -6,7 +6,6 @@
 
 #include "AltitudeWidget.h"
 #include <QChart>
-#include <QGraphicsLayout>
 #include <QLayout>
 
 /*!

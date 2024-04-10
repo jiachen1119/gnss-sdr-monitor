@@ -26,6 +26,8 @@ public:
     void updateChart_noIndex(const boost::circular_buffer<QPointF>& buffer, int index);
 
     void setLegend(const int& index, const QString& name);
+    void clear();
+    void setAutoScale(bool open);
 
 private:
     std::unique_ptr<QtCharts::QChart> chart_;
@@ -33,6 +35,7 @@ private:
     std::vector<std::unique_ptr<QScatterSeries>> scatterSeries_;
 
     bool isPoint_ = false;
+    bool auto_scale_ = true;
 };
 
 

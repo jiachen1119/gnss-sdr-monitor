@@ -18,11 +18,11 @@
 #include "CustomChartView.h"
 #include "CustomTabWidget.h"
 #include "CustomTableView.h"
+#include "DopWidget.h"
 #include "PVTTableModel.h"
 #include "SocketGnss.h"
 #include "SocketPVT.h"
 #include "TabBarStyle.h"
-#include "dop_widget.h"
 #include "monitor_pvt_wrapper.h"
 #include "telecommand_widget.h"
 #include <QAbstractTableModel>

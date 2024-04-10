@@ -12,7 +12,7 @@
 #define GNSS_SDR_MONITOR_DOP_WIDGET_H_
 
 #include <boost/circular_buffer.hpp>
-#include <QChartView>
+#include "CustomChartView.h"
 #include <QLineSeries>
 #include <QWidget>
 #include "Variance.h"
@@ -31,27 +31,15 @@ public slots:
     void setBufferSize(size_t size);
 
 private:
-    void populateSeries(boost::circular_buffer<QPointF> queue, QtCharts::QLineSeries *series);
-
     size_t bufferSize_;
 
-    boost::circular_buffer<QPointF> gdopBuffer_;
-    boost::circular_buffer<QPointF> pdopBuffer_;
-    boost::circular_buffer<QPointF> hdopBuffer_;
-    boost::circular_buffer<QPointF> vdopBuffer_;
+    boost::circular_buffer<QPointF> gdop_buffer_;
+    boost::circular_buffer<QPointF> pdop_buffer_;
+    boost::circular_buffer<QPointF> hdop_buffer_;
+    boost::circular_buffer<QPointF> vdop_buffer_;
 
-    QtCharts::QChartView *m_chartView = nullptr;
+    CustomChartView* chart_view_;
 
-    QtCharts::QLineSeries *gdopSeries_ = nullptr;
-    QtCharts::QLineSeries *m_pdopSeries = nullptr;
-    QtCharts::QLineSeries *m_hdopSeries = nullptr;
-    QtCharts::QLineSeries *m_vdopSeries = nullptr;
-
-    double min_x;
-    double min_y;
-
-    double max_x;
-    double max_y;
 };
 
 #endif  // GNSS_SDR_MONITOR_DOP_WIDGET_H_
