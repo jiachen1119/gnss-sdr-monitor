@@ -204,6 +204,7 @@ void MainWindow::receiveMonitorPvt(PVTStruct in)
     {
         pvt_table_model_->populatePVT(in);
         monitorPvtWrapper_->addMonitorPvt(in);
+        dynamic_cast<AlertWidget*>(tab_widget_->widget(TAB_ALERT))->positionShow(in);
     }
 }
 

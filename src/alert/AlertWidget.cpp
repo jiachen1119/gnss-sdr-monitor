@@ -47,6 +47,7 @@ AlertWidget::AlertWidget(QWidget *parent): QWidget(parent)
     boost::circular_buffer<QPointF> buffer_HPL;
     buffer_HPE.resize(50);
     buffer_HPL.resize(50);
+    buffer_pos_.resize(50);
 
     QFile file("/home/tang/1.txt");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -75,4 +76,9 @@ AlertWidget::AlertWidget(QWidget *parent): QWidget(parent)
     al_level_->setLegend(0, QStringLiteral("HPE"));
     al_level_->setLegend(1, QStringLiteral("HPL"));
 
+}
+void AlertWidget::positionShow(PVTStruct in)
+{
+    buffer_pos_.push_back(QPointF(in.latitude,in.longitude));
+    position_corrected_->updateChart_noIndex(buffer_pos_);
 }

@@ -7,4 +7,4 @@ set(QT5_LIBRARIES
         Qt5::Gui
         Qt5::Widgets
 )
-target_link_libraries(alert PUBLIC ${QT5_LIBRARIES} plot Boost::boost)
+target_link_libraries(alert PUBLIC ${QT5_LIBRARIES} plot Boost::boost lib)
