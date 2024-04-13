@@ -70,6 +70,9 @@ AlertWidget::AlertWidget(QWidget *parent): QWidget(parent)
         }
     }
     file.close();
+    al_level_->setLineSeriesWidth(0,5);
+    al_level_->setLineSeriesWidth(1,5);
+
     al_level_->updateChart_noIndex(buffer_HPE,0);
     al_level_->updateChart_noIndex(buffer_HPL,1);
 

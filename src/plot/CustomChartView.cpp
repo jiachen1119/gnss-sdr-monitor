@@ -267,3 +267,17 @@ void CustomChartView::setAutoScale(bool open)
 {
     auto_scale_ = open;
 }
+
+void CustomChartView::setLineSeriesWidth(int width)
+{
+    auto pen = lineSeries_.at(0)->pen();
+    pen.setWidth(width);
+    lineSeries_.at(0)->setPen(pen);
+}
+
+void CustomChartView::setLineSeriesWidth(int index, int width)
+{
+    auto pen = lineSeries_.at(index)->pen();
+    pen.setWidth(width);
+    lineSeries_.at(index)->setPen(pen);
+}

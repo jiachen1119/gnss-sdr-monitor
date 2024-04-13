@@ -8,10 +8,6 @@
 
 #include "main_window.h"
 #include "CustomTabWidget.h"
-#include "Cn0Delegate.h"
-#include "ConstellationDelegate.h"
-#include "DopplerDelegate.h"
-#include "LedDelegate.h"
 #include "preferences_dialog.h"
 #include "ui_main_window.h"
 #include <QDebug>
@@ -52,11 +48,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Model.
     channelTableModel_ = new ChannelTableModel();
     channel_view_->setModel(channelTableModel_);
-    // add delegates to channel view
-    channel_view_->setItemDelegateForColumn(CHANNEL_CONSTELLATION, new ConstellationDelegate());
-    channel_view_->setItemDelegateForColumn(CHANNEL_CN0, new Cn0Delegate());
-    channel_view_->setItemDelegateForColumn(CHANNEL_DOPPLER, new DopplerDelegate());
-    channel_view_->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
 
     // layout for channel
     auto *layout_channel = new QHBoxLayout(tab_widget_->widget(TAB_CHANNEL));
@@ -166,7 +157,6 @@ MainWindow::~MainWindow() {
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     deletePlots();
-
     QMainWindow::closeEvent(event);
 }
 

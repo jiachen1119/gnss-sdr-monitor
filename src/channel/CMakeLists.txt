@@ -13,4 +13,4 @@ set(QT5_LIBRARIES
         Qt5::PrintSupport
         Qt5::Charts
 )
-target_link_libraries(channel PUBLIC ${QT5_LIBRARIES} Boost::boost)
+target_link_libraries(channel PUBLIC ${QT5_LIBRARIES} Boost::boost lib)

@@ -4,8 +4,13 @@
 
 #ifndef GNSS_SDR_MONITOR_CUSTOMCHANNELVIEW_H
 #define GNSS_SDR_MONITOR_CUSTOMCHANNELVIEW_H
-#include <QTableView>
 
+#include <QTableView>
+#include "Variance.h"
+#include "ConstellationDelegate.h"
+#include "DopplerDelegate.h"
+#include "LedDelegate.h"
+#include "Cn0Delegate.h"
 
 class CustomChannelView : public QTableView
 {

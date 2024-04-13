@@ -20,6 +20,12 @@ CustomChannelView::CustomChannelView(QWidget *parent) : QTableView (parent)
 
     this->horizontalHeader()->setFixedHeight(40);
 
+    // add delegates to channel view
+    this->setItemDelegateForColumn(CHANNEL_CONSTELLATION, new ConstellationDelegate());
+    this->setItemDelegateForColumn(CHANNEL_CN0, new Cn0Delegate());
+    this->setItemDelegateForColumn(CHANNEL_DOPPLER, new DopplerDelegate());
+    this->setItemDelegateForColumn(CHANNEL_TLM, new LedDelegate());
+
 }
 
 void CustomChannelView::resizeEvent(QResizeEvent *event)

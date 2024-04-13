@@ -28,6 +28,8 @@ public:
     void setLegend(const int& index, const QString& name);
     void clear();
     void setAutoScale(bool open);
+    void setLineSeriesWidth(int width);
+    void setLineSeriesWidth(int index, int width);
 
 private:
     std::unique_ptr<QtCharts::QChart> chart_;
