@@ -34,14 +34,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setWindowTitle(QStringLiteral("GNSS SDR Monitor designed by SEU Tang"));
 
-    //    QPalette palette;
-    //    palette.setColor(QPalette::Window,Qt::black); // 设置背景色
-    //    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）
-    //    ui->tabWidget_main->setPalette(palette);
+//    QPalette palette;
+//    palette.setColor(QPalette::Window,Qt::black); // 设置背景色
+//    palette.setColor(QPalette::WindowText, Qt::white); // 设置前景色（文本颜色）
+//    this->setPalette(palette);
 
     // 添加tab
     tab_widget_ = new CustomTabWidget();
-    ui->gridLayout->addWidget(tab_widget_);
+    custom_bar_ = new CustomBar();
+    ui->gridLayout->setContentsMargins(0,0,0,0);
+    ui->gridLayout->setRowStretch(0,1);
+    ui->gridLayout->setRowStretch(1,15);
+    ui->gridLayout->addWidget(tab_widget_,1,0,1,1);
+    ui->gridLayout->addWidget(custom_bar_,0,0,1,1);
 
     // QTableView.
     channel_view_ = new CustomChannelView(tab_widget_->widget(TAB_CHANNEL));

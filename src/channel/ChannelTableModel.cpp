@@ -194,7 +194,7 @@ QVariant ChannelTableModel::headerData(int section,Qt::Orientation orientation,
         }
     }
     if (role == Qt::FontRole)
-        return QFont("Calibri", 18, QFont::Medium);
+        return QFont("Calibri", 16, QFont::Medium);
     return QVariant::Invalid;
 }
 

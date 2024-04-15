@@ -12,6 +12,7 @@
 #define GNSS_SDR_MONITOR_MAIN_WINDOW_H_
 
 #include "AlertWidget.h"
+#include "CustomBar.h"
 #include "AltitudeWidget.h"
 #include "ChannelTableModel.h"
 #include "CustomChannelView.h"
@@ -74,6 +75,7 @@ private:
     int screenWidth_;
     int screenHeight_;
 
+    CustomBar *custom_bar_;
     CustomTabWidget *tab_widget_;
     CustomChannelView *channel_view_;
 
