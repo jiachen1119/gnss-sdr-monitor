@@ -51,7 +51,7 @@ add_subdirectory(PVT)
 add_subdirectory(channel)
 add_subdirectory(alert)
 
-aux_source_directory(. SRC_SOURCE)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SRC_SOURCE)
 
 set(UI_SOURCES
     main_window.ui

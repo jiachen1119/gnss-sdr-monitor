@@ -1,5 +1,5 @@
-set(STYLES_SOURCES CustomTabWidget.cpp TabBarStyle.cpp CustomBar.cpp)
-set(STYLES_HEADERS CustomTabWidget.h TabBarStyle.h CustomBar.h)
+set(STYLES_SOURCES CustomTabWidget.cpp TabBarStyle.cpp CustomToolBar.cpp)
+set(STYLES_HEADERS CustomTabWidget.h TabBarStyle.h CustomToolBar.h)
 add_library(styles ${STYLES_SOURCES} ${STYLES_HEADERS})
 
 set(QT5_LIBRARIES
