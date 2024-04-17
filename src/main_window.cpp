@@ -113,6 +113,10 @@ MainWindow::MainWindow(QWidget *parent)
         chart_view_for_multi_cno_->updateSeries(channelTableModel_->getCN0());
     });
 
+    qRegisterMetaType<std::map<int, QString>>("channel_name");
+    connect(channelTableModel_, &ChannelTableModel::addChannel,
+        chart_view_for_multi_cno_, &CustomChartViewForMultiCNo::updateName);
+
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
     ui->actionQuit->setShortcuts(QKeySequence::Quit);

@@ -3,6 +3,8 @@
 //
 
 #include "CustomChartViewForMultiCNo.h"
+
+#include <utility>
 CustomChartViewForMultiCNo::CustomChartViewForMultiCNo(QWidget *parent) : QtCharts::QChartView(parent)
 {
     // 抗锯齿
@@ -47,6 +49,21 @@ void CustomChartViewForMultiCNo::addSeries(int index, const QString &name)
     chart_->addSeries(lineSeries_[index]);
     lineSeries_[index]->attachAxis(axis_x_);
     lineSeries_[index]->attachAxis(axis_y_);
+    if (name.contains("GPS", Qt::CaseInsensitive))
+    {
+        lineSeries_[index]->setColor(color_gps_);
+        color_gps_ = color_gps_.lighter(125);
+    }
+    else if (name.contains("GAL", Qt::CaseInsensitive))
+    {
+        lineSeries_[index]->setColor(color_gal_);
+        color_gal_ = color_gal_.lighter(125);
+    }
+    else if (name.contains("BDS", Qt::CaseInsensitive))
+    {
+        lineSeries_[index]->setColor(color_bds_);
+        color_bds_ = color_bds_.lighter(125);
+    }
 }
 
 void CustomChartViewForMultiCNo::removeSeries(int index)
@@ -68,7 +85,15 @@ void CustomChartViewForMultiCNo::updateSeries(std::map<int,QVector<QPointF>> map
             }
             else
             {
-                addSeries(it.first, QString::number(it.first));
+                if (channel_name_.find(it.first) != channel_name_.end())
+                {
+                    addSeries(it.first, channel_name_[it.first]);
+                }
+                else
+                {
+                    qDebug() << "The channel name does not exist!";
+                    addSeries(it.first, QString::number(it.first));
+                }
                 lineSeries_[it.first]->replace(it.second);
             }
         }
@@ -84,4 +109,7 @@ void CustomChartViewForMultiCNo::updateSeries(std::map<int,QVector<QPointF>> map
     }
 }
 
-
+void CustomChartViewForMultiCNo::updateName(std::map<int, QString> channel_name)
+{
+    channel_name_ = std::move(channel_name);
+}

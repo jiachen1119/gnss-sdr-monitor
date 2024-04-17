@@ -24,6 +24,14 @@ private:
     QValueAxis *axis_x_;
     QValueAxis *axis_y_;
 
+    std::map<int, QString> channel_name_;
+    QColor color_gps_ = QColor(0X720320);
+    QColor color_bds_ = QColor(0X207203);
+    QColor color_gal_ = QColor(0X032072);
+
+public slots:
+    void updateName(std::map<int, QString> channel_name);
+
 };
 
 

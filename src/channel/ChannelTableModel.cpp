@@ -22,7 +22,6 @@ ChannelTableModel::ChannelTableModel()
     mapSignalName_["L5"] = "L5";
     mapSignalName_["E6"] = "E6b"; // Galileo E6B 1278.75MHz
 
-
     columns_ = 10;
     bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
 
@@ -228,6 +227,9 @@ void ChannelTableModel::populateChannel(const ChannelStruct& ch)
                 // PRN has changed so reset the channel.
                 clearChannel(id);
             }
+            else{
+                emit addChannel(getName());
+            }
         }
 
         // Check the size of the map of GnssSynchro objects before adding new data.
@@ -414,4 +416,15 @@ std::map<int, QVector<QPointF>> ChannelTableModel::getCN0()
         cn0.clear();
     }
     return cn0_map;
+}
+
+std::map<int, QString> ChannelTableModel::getName()
+{
+    std::map<int, QString> name_map;
+    if (channelsSignal_.empty() || channelsId_.empty()) return name_map;
+    for (const auto& i : channelsSignal_){
+        if (channels_.find(i.first) == channels_.end()) continue;
+        name_map.insert(std::make_pair(i.first,i.second + " " + QString::number(channels_.at(i.first).prn)));
+    }
+    return name_map;
 }

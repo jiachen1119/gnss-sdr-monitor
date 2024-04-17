@@ -18,6 +18,7 @@ typedef boost::circular_buffer<double> CBuff;
 
 class ChannelTableModel : public QAbstractTableModel
 {
+Q_OBJECT
 public:
     //initialize the channel of gnss signals
     ChannelTableModel();
@@ -44,9 +45,11 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-public slots:
     std::map<int, QVector<QPointF>> getCN0();
+    std::map<int, QString> getName();
 
+signals:
+    void addChannel(std::map<int, QString> channel_name);
 
 protected:
     int columns_;
