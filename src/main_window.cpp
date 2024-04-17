@@ -104,6 +104,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(monitorPvtWrapper_, &MonitorPvtWrapper::dopChanged, dop_widget_, &DOPWidget::addData);
     connect(&updateTimer_, &QTimer::timeout, dop_widget_, &DOPWidget::redraw);
 
+    // MultiCNo widget
+    chart_view_for_multi_cno_ = new CustomChartViewForMultiCNo();
+    auto layout_multi_cno = new QVBoxLayout(tab_widget_->widget(TAB_ABOUT));
+    tab_widget_->widget(TAB_ABOUT)->setLayout(layout_multi_cno);
+    layout_multi_cno->addWidget(chart_view_for_multi_cno_);
+    connect(&updateTimer_, &QTimer::timeout, this,[=] {
+        chart_view_for_multi_cno_->updateSeries(channelTableModel_->getCN0());
+    });
+
     // QMenuBar.
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
     ui->actionQuit->setShortcuts(QKeySequence::Quit);

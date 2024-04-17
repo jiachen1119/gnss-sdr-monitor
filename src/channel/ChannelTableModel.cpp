@@ -397,3 +397,21 @@ void ChannelTableModel::checkChannels()
         checkNum_.insert(std::make_pair(i.first,i.second.back()));
     }
 }
+
+std::map<int, QVector<QPointF>> ChannelTableModel::getCN0()
+{
+    std::map<int, QVector<QPointF>> cn0_map;
+    QVector<QPointF> cn0;
+
+    if (channelsCn0_.empty() || channelsTime_.empty()) return cn0_map;
+    for (const auto& i : channelsCn0_){
+        if (channelsTime_.find(i.first) == channelsTime_.end()) continue;
+        for (int j = 0; j < i.second.size(); j++){
+            QPointF point(channelsTime_.at(i.first).at(j),i.second.at(j));
+            cn0.push_back(point);
+        }
+        cn0_map.insert(std::make_pair(i.first,cn0));
+        cn0.clear();
+    }
+    return cn0_map;
+}

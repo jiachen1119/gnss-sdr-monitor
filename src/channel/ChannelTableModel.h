@@ -44,6 +44,9 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+public slots:
+    std::map<int, QVector<QPointF>> getCN0();
+
 
 protected:
     int columns_;

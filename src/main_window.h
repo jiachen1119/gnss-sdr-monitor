@@ -16,6 +16,7 @@
 #include "ChannelTableModel.h"
 #include "CustomChannelView.h"
 #include "CustomChartView.h"
+#include "CustomChartViewForMultiCNo.h"
 #include "CustomTabWidget.h"
 #include "CustomTableView.h"
 #include "CustomToolBar.h"
@@ -78,6 +79,7 @@ private:
     CustomToolBar *custom_tool_bar_;
     CustomTabWidget *tab_widget_;
     CustomChannelView *channel_view_;
+    CustomChartViewForMultiCNo *chart_view_for_multi_cno_;
 
     QQuickWidget *map_widget_;
 
