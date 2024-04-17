@@ -227,9 +227,6 @@ void ChannelTableModel::populateChannel(const ChannelStruct& ch)
                 // PRN has changed so reset the channel.
                 clearChannel(id);
             }
-            else{
-                emit addChannel(getName());
-            }
         }
 
         // Check the size of the map of GnssSynchro objects before adding new data.
@@ -282,6 +279,7 @@ void ChannelTableModel::populateChannel(const ChannelStruct& ch)
             // Map size has changed
             // so record the new channel number in the vector of channel IDs.
             channelsId_.push_back(id);
+            emit addChannel(getName());
         }
 }
 
