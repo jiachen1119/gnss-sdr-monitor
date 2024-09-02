@@ -25,7 +25,7 @@ ChannelTableModel::ChannelTableModel()
     columns_ = 10;
     bufferSize_ = BUFFER_SIZE_FOR_CHANNEL;
 
-    checkTimer_.setInterval(500);
+    checkTimer_.setInterval(1000);
     connect(&checkTimer_,&QTimer::timeout,this,&ChannelTableModel::checkChannels);
     checkTimer_.start();
 }
@@ -374,21 +374,23 @@ int ChannelTableModel::getChannelId(int row)
 void ChannelTableModel::checkChannels()
 {
     if (channelsTime_.empty()) return;
-    if (checkNum_.empty()){
-        for (const auto& i : channelsTime_){
-            checkNum_.insert(std::make_pair(i.first,i.second.back()));
+    if (checkNum_.empty())
+    {
+        for (const auto& i : channelsTime_)
+        {
+            checkNum_.insert(std::make_pair(i.first, i.second.back()));
         }
         return;
     }
+    // test the situation that the channel is lost
+    // (check the circular buffer with checkNum_)
     for (auto j : checkNum_){
-        if (channelsTime_.find(j.first)==channelsTime_.end()){
-            checkNum_.clear();
-            return;
+        if (channelsTime_.find(j.first) == channelsTime_.end()){
+            clearChannel(j.first);
         }
         else{
-            if (channelsTime_.find(j.first)->second.back()==j.second){
+            if (channelsTime_.find(j.first)->second.back() == j.second){
                 clearChannel(j.first);
-                break;
             }
         }
     }

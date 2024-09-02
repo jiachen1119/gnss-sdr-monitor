@@ -3,10 +3,14 @@
 //
 
 #include "CustomChartViewForMultiCNo.h"
-
+#include <iostream>
 #include <utility>
 CustomChartViewForMultiCNo::CustomChartViewForMultiCNo(QWidget *parent) : QtCharts::QChartView(parent)
 {
+    // set a buffer for updating the chart (remove the channel that had no data)
+    bufferPRN_ = new boost::circular_buffer<int>(15);
+    timer_ = new QTimer(this);
+
     // 抗锯齿
     this->setRenderHint(QPainter::Antialiasing, true);
     this->setContentsMargins(0,0,0,0);
@@ -79,6 +83,8 @@ void CustomChartViewForMultiCNo::updateSeries(std::map<int,QVector<QPointF>> map
     if (!map.empty()){
         for (auto &it : map)
         {
+            // update the buffer of PRN
+            bufferPRN_->push_back(it.first);
             if (lineSeries_.contains(it.first))
             {
                 lineSeries_[it.first]->replace(it.second);
@@ -97,15 +103,41 @@ void CustomChartViewForMultiCNo::updateSeries(std::map<int,QVector<QPointF>> map
                 lineSeries_[it.first]->replace(it.second);
             }
         }
-        for (auto it = lineSeries_.begin(); it != lineSeries_.end(); ++it)
+        // remove the channel that had no data
+        if (bufferPRN_->full())
         {
-            if (map.find(it.key()) == map.end())
+            if (lineSeries_.empty())
             {
-                removeSeries(it.key());
+                bufferPRN_->clear();
+                return;
+            }
+            for (auto &prn : *bufferPRN_)
+            {
+                std::cout<<"prn "<<prn<<std::endl;
+            }
+            for (auto it = lineSeries_.begin(); it != lineSeries_.end(); ++it)
+            {
+                std::cout<<"k " <<it.key()<<std::endl;
+                if (std::find(bufferPRN_->begin(), bufferPRN_->end(), it.key()) == bufferPRN_->end())
+                {
+                    std::cout<<"remove "<<it.key()<<std::endl;
+                    removeSeries(it.key());
+                    break;
+                }
             }
         }
         axis_x_->setRange(map.begin()->second.first().x(), map.begin()->second.last().x());
-
+    }
+    else
+    {
+        std::cout << "The map is empty!" << std::endl;
+        bufferPRN_->clear();
+        if (lineSeries_.empty())
+        {
+            return;
+        }
+        lineSeries_.clear();
+        chart_->removeAllSeries();
     }
 }
 

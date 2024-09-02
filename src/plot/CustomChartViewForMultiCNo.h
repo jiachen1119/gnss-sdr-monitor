@@ -5,6 +5,8 @@
 #ifndef GNSS_SDR_MONITOR_CUSTOMCHARTVIEWFORMULTICNO_H
 #define GNSS_SDR_MONITOR_CUSTOMCHARTVIEWFORMULTICNO_H
 
+#include <boost/circular_buffer.hpp>
+#include <boost/concept/detail/backward_compatibility.hpp>
 #include <QWidget>
 #include <QtCharts>
 
@@ -20,6 +22,8 @@ public:
 private:
     std::unique_ptr<QtCharts::QChart> chart_;
     QMap<int, QLineSeries*> lineSeries_;
+    boost::circular_buffer<int> *bufferPRN_;
+    QTimer *timer_;
 
     QValueAxis *axis_x_;
     QValueAxis *axis_y_;

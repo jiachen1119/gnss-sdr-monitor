@@ -26,7 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 表格更新计时器
     updateTimer_.setInterval(500);
-    updateTimer_.setSingleShot(true);
+    updateTimer_.setSingleShot(false);
+    updateTimer_.start();
     connect(&updateTimer_, &QTimer::timeout, [this] { channelTableModel_->update(); });
     connect(&updateTimer_, &QTimer::timeout, [this] { pvt_table_model_->update(); });
 
@@ -201,10 +202,6 @@ void MainWindow::receiveGnssSynchro(const std::vector<ChannelStruct>& vector)
         channelTableModel_->populateChannels(vector);
         clear_->setEnabled(true);
     }
-    if (!updateTimer_.isActive())
-    {
-        updateTimer_.start();
-    }
 }
 
 void MainWindow::receiveMonitorPvt(PVTStruct in)
@@ -306,8 +303,8 @@ void MainWindow::expandPlot(const QModelIndex &index)
         if (plotsConstellation_.find(index.row()) == plotsConstellation_.end())
         {
             chartView = new CustomChartView(nullptr, true);
-            chartView->setTitle("Channel " + QString::number(channel_id)+" Constellation");
-            chartView->setAxisTitle("I prompt","Q prompt");
+            chartView->setTitle("Channel " + QString::number(channel_id) + " Constellation");
+            chartView->setAxisTitle("I prompt", "Q prompt");
             chartView->updateChart(index);
 
             // Delete the chartView object when MainWindow is closed.
@@ -315,12 +312,12 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
             // Remove element from map when chartView widget is closed.
             connect(chartView, &QObject::destroyed,
-                [this, index]() { plotsConstellation_.erase(index.row()); });
+                [this, index]()
+                { plotsConstellation_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, this, [index,chartView]() {
-                chartView->updateChart(index);
-            });
+            connect(&updateTimer_, &QTimer::timeout, this, [index, chartView]()
+                { chartView->updateChart(index); });
 
             plotsConstellation_[index.row()] = chartView;
         }
@@ -336,7 +333,7 @@ void MainWindow::expandPlot(const QModelIndex &index)
             // 必须是空指针，否则不会出现独立窗口
             chartView = new CustomChartView(nullptr, false);
             chartView->setTitle("CN0 CH " + QString::number(channel_id));
-            chartView->setAxisTitle("TOW [s]","C/N0 [db-Hz]");
+            chartView->setAxisTitle("TOW [s]", "C/N0 [db-Hz]");
             chartView->updateCN0Chart(index);
 
             // Delete the chartView object when MainWindow is closed.
@@ -344,12 +341,12 @@ void MainWindow::expandPlot(const QModelIndex &index)
 
             // Remove element from map when chartView widget is closed.
             connect(chartView, &QObject::destroyed,
-                [this, index]() { plotsCn0_.erase(index.row()); });
+                [this, index]()
+                { plotsCn0_.erase(index.row()); });
 
             // Update chart on timer timeout.
-            connect(&updateTimer_, &QTimer::timeout, this, [index,chartView]() {
-                chartView->updateCN0Chart(index);
-            });
+            connect(&updateTimer_, &QTimer::timeout, this, [index, chartView]()
+                { chartView->updateCN0Chart(index); });
 
             plotsCn0_[index.row()] = chartView;
         }
@@ -360,12 +357,11 @@ void MainWindow::expandPlot(const QModelIndex &index)
     }
     else if (index.column() == CHANNEL_DOPPLER)
     {
-
         if (plotsDoppler_.find(index.row()) == plotsDoppler_.end())
         {
             chartView = new CustomChartView(nullptr, false);
             chartView->setTitle("Doppler CH " + QString::number(channel_id));
-            chartView->setAxisTitle("TOW [s]","Doppler [Hz]");
+            chartView->setAxisTitle("TOW [s]", "Doppler [Hz]");
 
             // Draw chart now.
             chartView->updateChart(index);
